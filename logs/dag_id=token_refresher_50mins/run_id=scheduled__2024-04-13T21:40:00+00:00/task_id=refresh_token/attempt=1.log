@@ -1,0 +1,520 @@
+[2024-04-14T01:44:39.951+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T01:44:39.961+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T01:44:39.966+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T01:44:39.987+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): refresh_token> on 2024-04-13 21:40:00+00:00
+[2024-04-14T01:44:39.992+0000] {standard_task_runner.py:60} INFO - Started process 61 to run task
+[2024-04-14T01:44:39.994+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'refresh_token', 'scheduled__2024-04-13T21:40:00+00:00', '--job-id', '86', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmp74bd8gwq']
+[2024-04-14T01:44:40.005+0000] {standard_task_runner.py:88} INFO - Job 86: Subtask refresh_token
+[2024-04-14T01:44:40.087+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T01:44:40.173+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='refresh_token' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T21:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T21:40:00+00:00'
+[2024-04-14T01:44:40.177+0000] {oauth2.py:471} INFO - User authentication requires interaction with your web browser. Once you enter your credentials and give authorization, you will be redirected to a url.  Paste that url you were directed to to complete the authorization.
+[2024-04-14T01:44:40.178+0000] {oauth2.py:436} INFO - Opened https://accounts.spotify.com/authorize?client_id=3140d7f560664be9a52544791c13b670&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070%2Fcallback&scope=playlist-modify-private in your browser
+[2024-04-14T01:45:15.278+0000] {local_task_job_runner.py:302} WARNING - State of this instance has been externally set to None. Terminating instance.
+[2024-04-14T01:45:15.282+0000] {process_utils.py:131} INFO - Sending 15 to group 61. PIDs of all processes in the group: [61]
+[2024-04-14T01:45:15.282+0000] {process_utils.py:86} INFO - Sending the signal 15 to group 61
+[2024-04-14T01:45:15.283+0000] {taskinstance.py:2483} ERROR - Received SIGTERM. Terminating subprocesses.
+[2024-04-14T01:45:15.297+0000] {taskinstance.py:2731} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 444, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 414, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 200, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 217, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/refresh_token.py", line 34, in refresh_token
+    current_user = sp.current_user()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1227, in current_user
+    return self.me()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1221, in me
+    return self._get("me/")
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 323, in _get
+    return self._internal_call("GET", url, payload, kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 247, in _internal_call
+    headers = self._auth_headers()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 238, in _auth_headers
+    token = self.auth_manager.get_access_token(as_dict=False)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 535, in get_access_token
+    "code": code or self.get_auth_response(),
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 490, in get_auth_response
+    return self._get_auth_response_local_server(redirect_port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 459, in _get_auth_response_local_server
+    server.handle_request()
+  File "/usr/local/lib/python3.8/socketserver.py", line 294, in handle_request
+    ready = selector.select(timeout)
+  File "/usr/local/lib/python3.8/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 2485, in signal_handler
+    raise AirflowException("Task received SIGTERM signal")
+airflow.exceptions.AirflowException: Task received SIGTERM signal
+[2024-04-14T01:45:15.302+0000] {taskinstance.py:1149} INFO - Marking task as FAILED. dag_id=token_refresher_50mins, task_id=refresh_token, execution_date=20240413T214000, start_date=20240414T014439, end_date=20240414T014515
+[2024-04-14T01:45:15.311+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 86 for task refresh_token ((psycopg2.errors.ForeignKeyViolation) insert or update on table "task_fail" violates foreign key constraint "task_fail_ti_fkey"
+DETAIL:  Key (dag_id, task_id, run_id, map_index)=(token_refresher_50mins, refresh_token, scheduled__2024-04-13T21:40:00+00:00, -1) is not present in table "task_instance".
+
+[SQL: INSERT INTO task_fail (task_id, dag_id, run_id, map_index, start_date, end_date, duration) VALUES (%(task_id)s, %(dag_id)s, %(run_id)s, %(map_index)s, %(start_date)s, %(end_date)s, %(duration)s) RETURNING task_fail.id]
+[parameters: {'task_id': 'refresh_token', 'dag_id': 'token_refresher_50mins', 'run_id': 'scheduled__2024-04-13T21:40:00+00:00', 'map_index': -1, 'start_date': datetime.datetime(2024, 4, 14, 1, 44, 39, 954222, tzinfo=Timezone('UTC')), 'end_date': datetime.datetime(2024, 4, 14, 1, 45, 15, 301626, tzinfo=Timezone('UTC')), 'duration': 35}]
+(Background on this error at: https://sqlalche.me/e/14/gkpj); 61)
+[2024-04-14T01:45:15.339+0000] {process_utils.py:79} INFO - Process psutil.Process(pid=61, status='terminated', exitcode=1, started='01:44:39') (61) terminated with exit code 1
+[2024-04-14T01:45:18.171+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T01:45:18.178+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T01:45:18.179+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T01:45:18.187+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): refresh_token> on 2024-04-13 21:40:00+00:00
+[2024-04-14T01:45:18.190+0000] {standard_task_runner.py:60} INFO - Started process 89 to run task
+[2024-04-14T01:45:18.193+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'refresh_token', 'scheduled__2024-04-13T21:40:00+00:00', '--job-id', '98', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmp9ehdbj80']
+[2024-04-14T01:45:18.196+0000] {standard_task_runner.py:88} INFO - Job 98: Subtask refresh_token
+[2024-04-14T01:45:18.320+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T01:45:18.378+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='refresh_token' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T21:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T21:40:00+00:00'
+[2024-04-14T01:45:18.380+0000] {oauth2.py:471} INFO - User authentication requires interaction with your web browser. Once you enter your credentials and give authorization, you will be redirected to a url.  Paste that url you were directed to to complete the authorization.
+[2024-04-14T01:45:18.381+0000] {taskinstance.py:2731} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 444, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 414, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 200, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 217, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/refresh_token.py", line 34, in refresh_token
+    current_user = sp.current_user()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1227, in current_user
+    return self.me()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1221, in me
+    return self._get("me/")
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 323, in _get
+    return self._internal_call("GET", url, payload, kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 247, in _internal_call
+    headers = self._auth_headers()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 238, in _auth_headers
+    token = self.auth_manager.get_access_token(as_dict=False)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 535, in get_access_token
+    "code": code or self.get_auth_response(),
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 490, in get_auth_response
+    return self._get_auth_response_local_server(redirect_port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 457, in _get_auth_response_local_server
+    server = start_local_http_server(redirect_port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 1303, in start_local_http_server
+    server = HTTPServer(("127.0.0.1", port), handler)
+  File "/usr/local/lib/python3.8/socketserver.py", line 452, in __init__
+    self.server_bind()
+  File "/usr/local/lib/python3.8/http/server.py", line 139, in server_bind
+    socketserver.TCPServer.server_bind(self)
+  File "/usr/local/lib/python3.8/socketserver.py", line 466, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 98] Address already in use
+[2024-04-14T01:45:18.387+0000] {taskinstance.py:1149} INFO - Marking task as UP_FOR_RETRY. dag_id=token_refresher_50mins, task_id=refresh_token, execution_date=20240413T214000, start_date=20240414T014518, end_date=20240414T014518
+[2024-04-14T01:45:18.398+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 98 for task refresh_token ([Errno 98] Address already in use; 89)
+[2024-04-14T01:45:18.431+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-04-14T01:45:18.500+0000] {taskinstance.py:3312} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2024-04-14T01:46:49.371+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T01:46:49.376+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T01:46:49.376+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T01:46:49.383+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): refresh_token> on 2024-04-13 21:40:00+00:00
+[2024-04-14T01:46:49.386+0000] {standard_task_runner.py:60} INFO - Started process 128 to run task
+[2024-04-14T01:46:49.388+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'refresh_token', 'scheduled__2024-04-13T21:40:00+00:00', '--job-id', '106', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmp5gnka00_']
+[2024-04-14T01:46:49.389+0000] {standard_task_runner.py:88} INFO - Job 106: Subtask refresh_token
+[2024-04-14T01:46:49.415+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T01:46:49.452+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='refresh_token' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T21:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T21:40:00+00:00'
+[2024-04-14T01:46:49.453+0000] {oauth2.py:471} INFO - User authentication requires interaction with your web browser. Once you enter your credentials and give authorization, you will be redirected to a url.  Paste that url you were directed to to complete the authorization.
+[2024-04-14T01:46:49.454+0000] {taskinstance.py:2731} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 444, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 414, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 200, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 217, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/refresh_token.py", line 34, in refresh_token
+    current_user = sp.current_user()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1227, in current_user
+    return self.me()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1221, in me
+    return self._get("me/")
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 323, in _get
+    return self._internal_call("GET", url, payload, kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 247, in _internal_call
+    headers = self._auth_headers()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 238, in _auth_headers
+    token = self.auth_manager.get_access_token(as_dict=False)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 535, in get_access_token
+    "code": code or self.get_auth_response(),
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 490, in get_auth_response
+    return self._get_auth_response_local_server(redirect_port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 457, in _get_auth_response_local_server
+    server = start_local_http_server(redirect_port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 1303, in start_local_http_server
+    server = HTTPServer(("127.0.0.1", port), handler)
+  File "/usr/local/lib/python3.8/socketserver.py", line 452, in __init__
+    self.server_bind()
+  File "/usr/local/lib/python3.8/http/server.py", line 139, in server_bind
+    socketserver.TCPServer.server_bind(self)
+  File "/usr/local/lib/python3.8/socketserver.py", line 466, in server_bind
+    self.socket.bind(self.server_address)
+OSError: [Errno 98] Address already in use
+[2024-04-14T01:46:49.458+0000] {taskinstance.py:1149} INFO - Marking task as UP_FOR_RETRY. dag_id=token_refresher_50mins, task_id=refresh_token, execution_date=20240413T214000, start_date=20240414T014649, end_date=20240414T014649
+[2024-04-14T01:46:49.463+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 106 for task refresh_token ([Errno 98] Address already in use; 128)
+[2024-04-14T01:46:49.485+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-04-14T01:46:49.499+0000] {taskinstance.py:3312} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2024-04-14T02:34:53.769+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T02:34:53.786+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T02:34:53.786+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T02:34:53.799+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): refresh_token> on 2024-04-13 21:40:00+00:00
+[2024-04-14T02:34:53.803+0000] {standard_task_runner.py:60} INFO - Started process 945 to run task
+[2024-04-14T02:34:53.806+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'refresh_token', 'scheduled__2024-04-13T21:40:00+00:00', '--job-id', '146', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmplo6pcjv7']
+[2024-04-14T02:34:53.807+0000] {standard_task_runner.py:88} INFO - Job 146: Subtask refresh_token
+[2024-04-14T02:34:53.843+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T02:34:53.909+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='refresh_token' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T21:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T21:40:00+00:00'
+[2024-04-14T02:34:53.982+0000] {logging_mixin.py:188} INFO - BQCznzg3d9HbBbyJ2TsVY8HaHhAHHfED145rMw0cnWUgIJUtEkBG2kgfdUdJy8qo3YHrvjejeVZh4vABTVvuJsRbka_t8cQvyMQRVoKrINBi8I4qTCI
+[2024-04-14T02:34:53.983+0000] {python.py:202} INFO - Done. Returned value was: None
+[2024-04-14T02:34:53.989+0000] {taskinstance.py:1149} INFO - Marking task as SUCCESS. dag_id=token_refresher_50mins, task_id=refresh_token, execution_date=20240413T214000, start_date=20240414T023453, end_date=20240414T023453
+[2024-04-14T02:34:54.027+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-04-14T02:34:54.035+0000] {taskinstance.py:3312} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2024-04-14T02:37:57.801+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T02:37:57.806+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T02:37:57.806+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T02:37:57.821+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): refresh_token> on 2024-04-13 21:40:00+00:00
+[2024-04-14T02:37:57.824+0000] {standard_task_runner.py:60} INFO - Started process 1052 to run task
+[2024-04-14T02:37:57.827+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'refresh_token', 'scheduled__2024-04-13T21:40:00+00:00', '--job-id', '179', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmptnkypht4']
+[2024-04-14T02:37:57.828+0000] {standard_task_runner.py:88} INFO - Job 179: Subtask refresh_token
+[2024-04-14T02:37:57.857+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T02:37:57.904+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='refresh_token' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T21:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T21:40:00+00:00'
+[2024-04-14T02:37:57.972+0000] {logging_mixin.py:188} WARNING - --- Logging error ---
+[2024-04-14T02:37:57.973+0000] {logging_mixin.py:188} WARNING - Traceback (most recent call last):
+[2024-04-14T02:37:57.974+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1085, in emit
+    msg = self.format(record)
+[2024-04-14T02:37:57.975+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 929, in format
+    return fmt.format(record)
+[2024-04-14T02:37:57.975+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 668, in format
+    record.message = record.getMessage()
+[2024-04-14T02:37:57.976+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 373, in getMessage
+    msg = msg % self.args
+[2024-04-14T02:37:57.976+0000] {logging_mixin.py:188} WARNING - TypeError: not all arguments converted during string formatting
+[2024-04-14T02:37:57.977+0000] {logging_mixin.py:188} WARNING - Call stack:
+[2024-04-14T02:37:57.982+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/bin/***", line 8, in <module>
+    sys.exit(main())
+[2024-04-14T02:37:57.983+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/__main__.py", line 57, in main
+    args.func(args)
+[2024-04-14T02:37:57.984+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+[2024-04-14T02:37:57.985+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/cli.py", line 114, in wrapper
+    return f(*args, **kwargs)
+[2024-04-14T02:37:57.985+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 60, in wrapper
+    providers_configuration_loaded(func)(*args, **kwargs)
+[2024-04-14T02:37:57.986+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/providers_configuration_loader.py", line 55, in wrapped_function
+    return func(*args, **kwargs)
+[2024-04-14T02:37:57.986+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 231, in worker
+    _run_command_with_daemon_option(
+[2024-04-14T02:37:57.987+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 46, in _run_command_with_daemon_option
+    run_command_with_daemon_option(*args, **kwargs)
+[2024-04-14T02:37:57.989+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/daemon_utils.py", line 86, in run_command_with_daemon_option
+    callback()
+[2024-04-14T02:37:57.991+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 224, in run_celery_worker
+    celery_app.worker_main(options)
+[2024-04-14T02:37:57.991+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/base.py", line 389, in worker_main
+    self.start(argv=argv)
+[2024-04-14T02:37:57.992+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/base.py", line 369, in start
+    celery.main(args=argv, standalone_mode=False)
+[2024-04-14T02:37:57.993+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+[2024-04-14T02:37:57.993+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 1688, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+[2024-04-14T02:37:57.995+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+[2024-04-14T02:37:57.996+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+[2024-04-14T02:37:57.997+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/decorators.py", line 33, in new_func
+    return f(get_current_context(), *args, **kwargs)
+[2024-04-14T02:37:57.998+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bin/base.py", line 134, in caller
+    return f(ctx, *args, **kwargs)
+[2024-04-14T02:37:57.998+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bin/worker.py", line 356, in worker
+    worker.start()
+[2024-04-14T02:37:57.999+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/worker/worker.py", line 202, in start
+    self.blueprint.start(self)
+[2024-04-14T02:37:58.001+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+[2024-04-14T02:37:58.003+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+[2024-04-14T02:37:58.004+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/base.py", line 130, in start
+    self.on_start()
+[2024-04-14T02:37:58.005+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+[2024-04-14T02:37:58.006+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/asynpool.py", line 464, in __init__
+    super().__init__(processes, *args, **kwargs)
+[2024-04-14T02:37:58.007+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 1045, in __init__
+    self._create_worker_process(i)
+[2024-04-14T02:37:58.008+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/asynpool.py", line 482, in _create_worker_process
+    return super()._create_worker_process(i)
+[2024-04-14T02:37:58.008+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 1157, in _create_worker_process
+    w.start()
+[2024-04-14T02:37:58.009+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/process.py", line 120, in start
+    self._popen = self._Popen(self)
+[2024-04-14T02:37:58.009+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/context.py", line 331, in _Popen
+    return Popen(process_obj)
+[2024-04-14T02:37:58.010+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/popen_fork.py", line 22, in __init__
+    self._launch(process_obj)
+[2024-04-14T02:37:58.010+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/popen_fork.py", line 77, in _launch
+    code = process_obj._bootstrap()
+[2024-04-14T02:37:58.011+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/process.py", line 323, in _bootstrap
+    self.run()
+[2024-04-14T02:37:58.012+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/process.py", line 110, in run
+    self._target(*self._args, **self._kwargs)
+[2024-04-14T02:37:58.013+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 291, in __call__
+    sys.exit(self.workloop(pid=pid))
+[2024-04-14T02:37:58.014+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 361, in workloop
+    result = (True, prepare_result(fun(*args, **kwargs)))
+[2024-04-14T02:37:58.016+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/trace.py", line 675, in fast_trace_task
+    R, I, T, Rstr = tasks[task].__trace__(
+[2024-04-14T02:37:58.017+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/trace.py", line 477, in trace_task
+    R = retval = fun(*args, **kwargs)
+[2024-04-14T02:37:58.018+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/trace.py", line 760, in __protected_call__
+    return self.run(*args, **kwargs)
+[2024-04-14T02:37:58.019+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/executors/celery_executor_utils.py", line 135, in execute_command
+    _execute_in_fork(command_to_exec, celery_task_id)
+[2024-04-14T02:37:58.019+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/executors/celery_executor_utils.py", line 169, in _execute_in_fork
+    args.func(args)
+[2024-04-14T02:37:58.020+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+[2024-04-14T02:37:58.020+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/cli.py", line 114, in wrapper
+    return f(*args, **kwargs)
+[2024-04-14T02:37:58.021+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 438, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+[2024-04-14T02:37:58.022+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 216, in _run_task_by_selected_method
+    return _run_task_by_local_task_job(args, ti)
+[2024-04-14T02:37:58.022+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 278, in _run_task_by_local_task_job
+    ret = run_job(job=job_runner.job, execute_callable=job_runner._execute)
+[2024-04-14T02:37:58.023+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/session.py", line 79, in wrapper
+    return func(*args, session=session, **kwargs)
+[2024-04-14T02:37:58.024+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/jobs/job.py", line 395, in run_job
+    return execute_job(job, execute_callable=execute_callable)
+[2024-04-14T02:37:58.024+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/jobs/job.py", line 424, in execute_job
+    ret = execute_callable()
+[2024-04-14T02:37:58.025+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/jobs/local_task_job_runner.py", line 165, in _execute
+    self.task_runner.start()
+[2024-04-14T02:37:58.026+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/task/task_runner/standard_task_runner.py", line 48, in start
+    self.process = self._start_by_fork()
+[2024-04-14T02:37:58.027+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/task/task_runner/standard_task_runner.py", line 100, in _start_by_fork
+    ret = args.func(args, dag=self.dag)
+[2024-04-14T02:37:58.028+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+[2024-04-14T02:37:58.029+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/cli.py", line 114, in wrapper
+    return f(*args, **kwargs)
+[2024-04-14T02:37:58.030+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 438, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+[2024-04-14T02:37:58.031+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 218, in _run_task_by_selected_method
+    return _run_raw_task(args, ti)
+[2024-04-14T02:37:58.031+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 297, in _run_raw_task
+    return ti._run_raw_task(
+[2024-04-14T02:37:58.032+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/session.py", line 79, in wrapper
+    return func(*args, session=session, **kwargs)
+[2024-04-14T02:37:58.032+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 2360, in _run_raw_task
+    self._execute_task_with_callbacks(context, test_mode, session=session)
+[2024-04-14T02:37:58.033+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 2532, in _execute_task_with_callbacks
+    result = self._execute_task(context, task_orig)
+[2024-04-14T02:37:58.035+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 2549, in _execute_task
+    return _execute_task(self, context, task_orig)
+[2024-04-14T02:37:58.036+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 444, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+[2024-04-14T02:37:58.036+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 414, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+[2024-04-14T02:37:58.037+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/operators/python.py", line 200, in execute
+    return_value = self.execute_callable()
+[2024-04-14T02:37:58.037+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/operators/python.py", line 217, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+[2024-04-14T02:37:58.038+0000] {logging_mixin.py:188} WARNING -   File "/opt/***/dags/refresh_token.py", line 46, in refresh_token
+    logging.info("access_token:", access_token)
+[2024-04-14T02:37:58.039+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 2082, in info
+    root.info(msg, *args, **kwargs)
+[2024-04-14T02:37:58.040+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1446, in info
+    self._log(INFO, msg, args, **kwargs)
+[2024-04-14T02:37:58.041+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1589, in _log
+    self.handle(record)
+[2024-04-14T02:37:58.043+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1599, in handle
+    self.callHandlers(record)
+[2024-04-14T02:37:58.044+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1661, in callHandlers
+    hdlr.handle(record)
+[2024-04-14T02:37:58.045+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 954, in handle
+    self.emit(record)
+[2024-04-14T02:37:58.045+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/log/file_task_handler.py", line 247, in emit
+    self.handler.emit(record)
+[2024-04-14T02:37:58.046+0000] {logging_mixin.py:188} WARNING - Message: 'access_token:'
+Arguments: ('BQDhYqZZ1bJgBYvi-EuZLFq4baA9g_x2f0Vnynf_VMYxwZ4BeUOB2wGHgkne-KhmnJAPNCKfrQwglfAMRDJK-7qBNcZs7pyZMcDGkaibLt5lTeK85uI',)
+[2024-04-14T02:37:58.047+0000] {python.py:202} INFO - Done. Returned value was: None
+[2024-04-14T02:37:58.055+0000] {taskinstance.py:1149} INFO - Marking task as SUCCESS. dag_id=token_refresher_50mins, task_id=refresh_token, execution_date=20240413T214000, start_date=20240414T023757, end_date=20240414T023758
+[2024-04-14T02:37:58.092+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-04-14T02:37:58.099+0000] {taskinstance.py:3312} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2024-04-14T02:46:30.783+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T02:46:30.789+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [queued]>
+[2024-04-14T02:46:30.790+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T02:46:30.804+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): refresh_token> on 2024-04-13 21:40:00+00:00
+[2024-04-14T02:46:30.808+0000] {standard_task_runner.py:60} INFO - Started process 1368 to run task
+[2024-04-14T02:46:30.811+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'refresh_token', 'scheduled__2024-04-13T21:40:00+00:00', '--job-id', '271', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmpcv4yxkkd']
+[2024-04-14T02:46:30.812+0000] {standard_task_runner.py:88} INFO - Job 271: Subtask refresh_token
+[2024-04-14T02:46:30.855+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.refresh_token scheduled__2024-04-13T21:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T02:46:30.908+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='refresh_token' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T21:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T21:40:00+00:00'
+[2024-04-14T02:46:31.020+0000] {logging_mixin.py:188} WARNING - --- Logging error ---
+[2024-04-14T02:46:31.021+0000] {logging_mixin.py:188} WARNING - Traceback (most recent call last):
+[2024-04-14T02:46:31.022+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1085, in emit
+    msg = self.format(record)
+[2024-04-14T02:46:31.022+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 929, in format
+    return fmt.format(record)
+[2024-04-14T02:46:31.023+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 668, in format
+    record.message = record.getMessage()
+[2024-04-14T02:46:31.024+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 373, in getMessage
+    msg = msg % self.args
+[2024-04-14T02:46:31.024+0000] {logging_mixin.py:188} WARNING - TypeError: not all arguments converted during string formatting
+[2024-04-14T02:46:31.025+0000] {logging_mixin.py:188} WARNING - Call stack:
+[2024-04-14T02:46:31.034+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/bin/***", line 8, in <module>
+    sys.exit(main())
+[2024-04-14T02:46:31.036+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/__main__.py", line 57, in main
+    args.func(args)
+[2024-04-14T02:46:31.038+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+[2024-04-14T02:46:31.038+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/cli.py", line 114, in wrapper
+    return f(*args, **kwargs)
+[2024-04-14T02:46:31.039+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 60, in wrapper
+    providers_configuration_loaded(func)(*args, **kwargs)
+[2024-04-14T02:46:31.039+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/providers_configuration_loader.py", line 55, in wrapped_function
+    return func(*args, **kwargs)
+[2024-04-14T02:46:31.040+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 231, in worker
+    _run_command_with_daemon_option(
+[2024-04-14T02:46:31.041+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 46, in _run_command_with_daemon_option
+    run_command_with_daemon_option(*args, **kwargs)
+[2024-04-14T02:46:31.044+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/daemon_utils.py", line 86, in run_command_with_daemon_option
+    callback()
+[2024-04-14T02:46:31.046+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/cli/celery_command.py", line 224, in run_celery_worker
+    celery_app.worker_main(options)
+[2024-04-14T02:46:31.046+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/base.py", line 389, in worker_main
+    self.start(argv=argv)
+[2024-04-14T02:46:31.047+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/base.py", line 369, in start
+    celery.main(args=argv, standalone_mode=False)
+[2024-04-14T02:46:31.049+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 1078, in main
+    rv = self.invoke(ctx)
+[2024-04-14T02:46:31.051+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 1688, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+[2024-04-14T02:46:31.053+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 1434, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+[2024-04-14T02:46:31.053+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/core.py", line 783, in invoke
+    return __callback(*args, **kwargs)
+[2024-04-14T02:46:31.054+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/click/decorators.py", line 33, in new_func
+    return f(get_current_context(), *args, **kwargs)
+[2024-04-14T02:46:31.056+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bin/base.py", line 134, in caller
+    return f(ctx, *args, **kwargs)
+[2024-04-14T02:46:31.060+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bin/worker.py", line 356, in worker
+    worker.start()
+[2024-04-14T02:46:31.061+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/worker/worker.py", line 202, in start
+    self.blueprint.start(self)
+[2024-04-14T02:46:31.062+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bootsteps.py", line 116, in start
+    step.start(parent)
+[2024-04-14T02:46:31.062+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/bootsteps.py", line 365, in start
+    return self.obj.start()
+[2024-04-14T02:46:31.063+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/base.py", line 130, in start
+    self.on_start()
+[2024-04-14T02:46:31.063+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/prefork.py", line 109, in on_start
+    P = self._pool = Pool(processes=self.limit,
+[2024-04-14T02:46:31.065+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/asynpool.py", line 464, in __init__
+    super().__init__(processes, *args, **kwargs)
+[2024-04-14T02:46:31.066+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 1045, in __init__
+    self._create_worker_process(i)
+[2024-04-14T02:46:31.069+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/concurrency/asynpool.py", line 482, in _create_worker_process
+    return super()._create_worker_process(i)
+[2024-04-14T02:46:31.070+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 1157, in _create_worker_process
+    w.start()
+[2024-04-14T02:46:31.071+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/process.py", line 120, in start
+    self._popen = self._Popen(self)
+[2024-04-14T02:46:31.072+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/context.py", line 331, in _Popen
+    return Popen(process_obj)
+[2024-04-14T02:46:31.075+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/popen_fork.py", line 22, in __init__
+    self._launch(process_obj)
+[2024-04-14T02:46:31.075+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/popen_fork.py", line 77, in _launch
+    code = process_obj._bootstrap()
+[2024-04-14T02:46:31.076+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/process.py", line 323, in _bootstrap
+    self.run()
+[2024-04-14T02:46:31.076+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/process.py", line 110, in run
+    self._target(*self._args, **self._kwargs)
+[2024-04-14T02:46:31.077+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 291, in __call__
+    sys.exit(self.workloop(pid=pid))
+[2024-04-14T02:46:31.078+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/billiard/pool.py", line 361, in workloop
+    result = (True, prepare_result(fun(*args, **kwargs)))
+[2024-04-14T02:46:31.078+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/trace.py", line 675, in fast_trace_task
+    R, I, T, Rstr = tasks[task].__trace__(
+[2024-04-14T02:46:31.079+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/trace.py", line 477, in trace_task
+    R = retval = fun(*args, **kwargs)
+[2024-04-14T02:46:31.080+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/celery/app/trace.py", line 760, in __protected_call__
+    return self.run(*args, **kwargs)
+[2024-04-14T02:46:31.081+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/executors/celery_executor_utils.py", line 135, in execute_command
+    _execute_in_fork(command_to_exec, celery_task_id)
+[2024-04-14T02:46:31.083+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/providers/celery/executors/celery_executor_utils.py", line 169, in _execute_in_fork
+    args.func(args)
+[2024-04-14T02:46:31.087+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+[2024-04-14T02:46:31.094+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/cli.py", line 114, in wrapper
+    return f(*args, **kwargs)
+[2024-04-14T02:46:31.094+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 438, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+[2024-04-14T02:46:31.095+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 216, in _run_task_by_selected_method
+    return _run_task_by_local_task_job(args, ti)
+[2024-04-14T02:46:31.096+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 278, in _run_task_by_local_task_job
+    ret = run_job(job=job_runner.job, execute_callable=job_runner._execute)
+[2024-04-14T02:46:31.097+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/session.py", line 79, in wrapper
+    return func(*args, session=session, **kwargs)
+[2024-04-14T02:46:31.097+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/jobs/job.py", line 395, in run_job
+    return execute_job(job, execute_callable=execute_callable)
+[2024-04-14T02:46:31.098+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/jobs/job.py", line 424, in execute_job
+    ret = execute_callable()
+[2024-04-14T02:46:31.099+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/jobs/local_task_job_runner.py", line 165, in _execute
+    self.task_runner.start()
+[2024-04-14T02:46:31.099+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/task/task_runner/standard_task_runner.py", line 48, in start
+    self.process = self._start_by_fork()
+[2024-04-14T02:46:31.100+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/task/task_runner/standard_task_runner.py", line 100, in _start_by_fork
+    ret = args.func(args, dag=self.dag)
+[2024-04-14T02:46:31.100+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+[2024-04-14T02:46:31.101+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/cli.py", line 114, in wrapper
+    return f(*args, **kwargs)
+[2024-04-14T02:46:31.102+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 438, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+[2024-04-14T02:46:31.108+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 218, in _run_task_by_selected_method
+    return _run_raw_task(args, ti)
+[2024-04-14T02:46:31.110+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/cli/commands/task_command.py", line 297, in _run_raw_task
+    return ti._run_raw_task(
+[2024-04-14T02:46:31.110+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/session.py", line 79, in wrapper
+    return func(*args, session=session, **kwargs)
+[2024-04-14T02:46:31.113+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 2360, in _run_raw_task
+    self._execute_task_with_callbacks(context, test_mode, session=session)
+[2024-04-14T02:46:31.114+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 2532, in _execute_task_with_callbacks
+    result = self._execute_task(context, task_orig)
+[2024-04-14T02:46:31.115+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 2549, in _execute_task
+    return _execute_task(self, context, task_orig)
+[2024-04-14T02:46:31.117+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 444, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+[2024-04-14T02:46:31.118+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/models/taskinstance.py", line 414, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+[2024-04-14T02:46:31.119+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/operators/python.py", line 200, in execute
+    return_value = self.execute_callable()
+[2024-04-14T02:46:31.119+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/operators/python.py", line 217, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+[2024-04-14T02:46:31.120+0000] {logging_mixin.py:188} WARNING -   File "/opt/***/dags/refresh_token.py", line 42, in refresh_token
+    logging.info("access_token:", access_token)
+[2024-04-14T02:46:31.122+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 2082, in info
+    root.info(msg, *args, **kwargs)
+[2024-04-14T02:46:31.123+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1446, in info
+    self._log(INFO, msg, args, **kwargs)
+[2024-04-14T02:46:31.123+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1589, in _log
+    self.handle(record)
+[2024-04-14T02:46:31.125+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1599, in handle
+    self.callHandlers(record)
+[2024-04-14T02:46:31.127+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 1661, in callHandlers
+    hdlr.handle(record)
+[2024-04-14T02:46:31.129+0000] {logging_mixin.py:188} WARNING -   File "/usr/local/lib/python3.8/logging/__init__.py", line 954, in handle
+    self.emit(record)
+[2024-04-14T02:46:31.132+0000] {logging_mixin.py:188} WARNING -   File "/home/***/.local/lib/python3.8/site-packages/***/utils/log/file_task_handler.py", line 247, in emit
+    self.handler.emit(record)
+[2024-04-14T02:46:31.132+0000] {logging_mixin.py:188} WARNING - Message: 'access_token:'
+Arguments: ('BQBVdN52ydcKBXszx3xXEYYF28s3TXlvB0mkaNYwmRLy5-eXJMcOaFoue0weYRMh9CGVelSrmg0Qx2HxGpEpvQ6FxtyYJupIqDV7FuoR6T_dP8AGi3c',)
+[2024-04-14T02:46:31.134+0000] {python.py:202} INFO - Done. Returned value was: None
+[2024-04-14T02:46:31.145+0000] {taskinstance.py:1149} INFO - Marking task as SUCCESS. dag_id=token_refresher_50mins, task_id=refresh_token, execution_date=20240413T214000, start_date=20240414T024630, end_date=20240414T024631
+[2024-04-14T02:46:31.196+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-04-14T02:46:31.230+0000] {taskinstance.py:3312} INFO - 1 downstream tasks scheduled from follow-on schedule check

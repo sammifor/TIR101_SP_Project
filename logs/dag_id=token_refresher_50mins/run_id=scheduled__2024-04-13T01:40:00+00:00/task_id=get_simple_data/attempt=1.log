@@ -1,0 +1,40 @@
+[2024-04-14T02:45:06.410+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-13T01:40:00+00:00 [queued]>
+[2024-04-14T02:45:06.420+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-13T01:40:00+00:00 [queued]>
+[2024-04-14T02:45:06.421+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T02:45:06.443+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): get_simple_data> on 2024-04-13 01:40:00+00:00
+[2024-04-14T02:45:06.453+0000] {standard_task_runner.py:60} INFO - Started process 1202 to run task
+[2024-04-14T02:45:06.455+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'get_simple_data', 'scheduled__2024-04-13T01:40:00+00:00', '--job-id', '199', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmpjh6bd7_w']
+[2024-04-14T02:45:06.457+0000] {standard_task_runner.py:88} INFO - Job 199: Subtask get_simple_data
+[2024-04-14T02:45:06.520+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-13T01:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T02:45:06.604+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='get_simple_data' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T01:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T01:40:00+00:00'
+[2024-04-14T02:45:06.676+0000] {taskinstance.py:2731} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 444, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 414, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 200, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 217, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/refresh_token.py", line 74, in get_simple_data
+    entries = response.json()["entries"]
+KeyError: 'entries'
+[2024-04-14T02:45:06.686+0000] {taskinstance.py:1149} INFO - Marking task as UP_FOR_RETRY. dag_id=token_refresher_50mins, task_id=get_simple_data, execution_date=20240413T014000, start_date=20240414T024506, end_date=20240414T024506
+[2024-04-14T02:45:06.705+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 199 for task get_simple_data ('entries'; 1202)
+[2024-04-14T02:45:06.723+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 1
+[2024-04-14T02:45:06.744+0000] {taskinstance.py:3312} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2024-04-14T02:46:21.694+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-13T01:40:00+00:00 [queued]>
+[2024-04-14T02:46:21.710+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-13T01:40:00+00:00 [queued]>
+[2024-04-14T02:46:21.711+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-14T02:46:21.728+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): get_simple_data> on 2024-04-13 01:40:00+00:00
+[2024-04-14T02:46:21.734+0000] {standard_task_runner.py:60} INFO - Started process 1293 to run task
+[2024-04-14T02:46:21.741+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'get_simple_data', 'scheduled__2024-04-13T01:40:00+00:00', '--job-id', '233', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmpo0g0jydq']
+[2024-04-14T02:46:21.747+0000] {standard_task_runner.py:88} INFO - Job 233: Subtask get_simple_data
+[2024-04-14T02:46:21.790+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-13T01:40:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-14T02:46:21.928+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='get_simple_data' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T01:40:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-13T01:40:00+00:00'
+[2024-04-14T02:46:21.944+0000] {refresh_token.py:77} INFO - token: BQCwFeDN8zk-Ysen0VEqoGVEgbW843kHVq4_KQjNjDVV7H8TJTsAIzlSaT9u-4W77JKixVMpbesmTZ27SJadlepjKCt6AEtGpzlR6z8Vp3I9ET25uBg
+[2024-04-14T02:46:21.945+0000] {python.py:202} INFO - Done. Returned value was: None
+[2024-04-14T02:46:21.977+0000] {taskinstance.py:1149} INFO - Marking task as SUCCESS. dag_id=token_refresher_50mins, task_id=get_simple_data, execution_date=20240413T014000, start_date=20240414T024621, end_date=20240414T024621
+[2024-04-14T02:46:22.026+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-04-14T02:46:22.087+0000] {taskinstance.py:3312} INFO - 0 downstream tasks scheduled from follow-on schedule check

@@ -1,0 +1,14 @@
+[2024-04-15T15:36:30.061+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-15T11:10:00+00:00 [queued]>
+[2024-04-15T15:36:30.074+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-15T11:10:00+00:00 [queued]>
+[2024-04-15T15:36:30.075+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-15T15:36:30.087+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): get_simple_data> on 2024-04-15 11:10:00+00:00
+[2024-04-15T15:36:30.094+0000] {standard_task_runner.py:60} INFO - Started process 13123 to run task
+[2024-04-15T15:36:30.097+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'get_simple_data', 'scheduled__2024-04-15T11:10:00+00:00', '--job-id', '373', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmplf7dty86']
+[2024-04-15T15:36:30.098+0000] {standard_task_runner.py:88} INFO - Job 373: Subtask get_simple_data
+[2024-04-15T15:36:30.139+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.get_simple_data scheduled__2024-04-15T11:10:00+00:00 [running]> on host 209a9ac884b0
+[2024-04-15T15:36:30.193+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='get_simple_data' AIRFLOW_CTX_EXECUTION_DATE='2024-04-15T11:10:00+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='scheduled__2024-04-15T11:10:00+00:00'
+[2024-04-15T15:36:30.200+0000] {refresh_token.py:79} INFO - token: BQCgC2OIMzHtLbLNuMzxDoe9xxWNim1nOV7QJS2_navHXiYW2ImhWJe6uD5fx-KsDktuRw33IZlM8B08SckK5u4m8WXgIpAyBgQsxuVf5PnrJpeGnyc
+[2024-04-15T15:36:30.201+0000] {python.py:202} INFO - Done. Returned value was: None
+[2024-04-15T15:36:30.204+0000] {taskinstance.py:1149} INFO - Marking task as SUCCESS. dag_id=token_refresher_50mins, task_id=get_simple_data, execution_date=20240415T111000, start_date=20240415T153630, end_date=20240415T153630
+[2024-04-15T15:36:30.239+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-04-15T15:36:30.246+0000] {taskinstance.py:3312} INFO - 0 downstream tasks scheduled from follow-on schedule check

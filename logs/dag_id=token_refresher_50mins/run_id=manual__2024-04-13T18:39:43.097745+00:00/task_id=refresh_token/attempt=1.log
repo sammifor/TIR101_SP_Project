@@ -1,0 +1,58 @@
+[2024-04-13T18:39:43.918+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token manual__2024-04-13T18:39:43.097745+00:00 [queued]>
+[2024-04-13T18:39:43.922+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: token_refresher_50mins.refresh_token manual__2024-04-13T18:39:43.097745+00:00 [queued]>
+[2024-04-13T18:39:43.922+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 2
+[2024-04-13T18:39:43.927+0000] {taskinstance.py:2217} INFO - Executing <Task(PythonOperator): refresh_token> on 2024-04-13 18:39:43.097745+00:00
+[2024-04-13T18:39:43.929+0000] {standard_task_runner.py:60} INFO - Started process 491 to run task
+[2024-04-13T18:39:43.931+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'token_refresher_50mins', 'refresh_token', 'manual__2024-04-13T18:39:43.097745+00:00', '--job-id', '23', '--raw', '--subdir', 'DAGS_FOLDER/refresh_token.py', '--cfg-path', '/tmp/tmpczd5_evc']
+[2024-04-13T18:39:43.932+0000] {standard_task_runner.py:88} INFO - Job 23: Subtask refresh_token
+[2024-04-13T18:39:43.951+0000] {task_command.py:423} INFO - Running <TaskInstance: token_refresher_50mins.refresh_token manual__2024-04-13T18:39:43.097745+00:00 [running]> on host 209a9ac884b0
+[2024-04-13T18:39:43.985+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='token_refresher_50mins' AIRFLOW_CTX_TASK_ID='refresh_token' AIRFLOW_CTX_EXECUTION_DATE='2024-04-13T18:39:43.097745+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-04-13T18:39:43.097745+00:00'
+[2024-04-13T18:39:43.986+0000] {oauth2.py:471} INFO - User authentication requires interaction with your web browser. Once you enter your credentials and give authorization, you will be redirected to a url.  Paste that url you were directed to to complete the authorization.
+[2024-04-13T18:39:43.987+0000] {oauth2.py:436} INFO - Opened https://accounts.spotify.com/authorize?client_id=3140d7f560664be9a52544791c13b670&response_type=code&redirect_uri=http%3A%2F%2Flocalhost%3A7070&scope=playlist-modify-private in your browser
+[2024-04-13T18:41:24.682+0000] {local_task_job_runner.py:302} WARNING - State of this instance has been externally set to None. Terminating instance.
+[2024-04-13T18:41:24.686+0000] {process_utils.py:131} INFO - Sending 15 to group 491. PIDs of all processes in the group: [491]
+[2024-04-13T18:41:24.687+0000] {process_utils.py:86} INFO - Sending the signal 15 to group 491
+[2024-04-13T18:41:24.688+0000] {taskinstance.py:2483} ERROR - Received SIGTERM. Terminating subprocesses.
+[2024-04-13T18:41:24.702+0000] {taskinstance.py:2731} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 444, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 414, in _execute_callable
+    return execute_callable(context=context, **execute_callable_kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 200, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/operators/python.py", line 217, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/refresh_token.py", line 34, in refresh_token
+    current_user = sp.current_user()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1227, in current_user
+    return self.me()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 1221, in me
+    return self._get("me/")
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 323, in _get
+    return self._internal_call("GET", url, payload, kwargs)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 247, in _internal_call
+    headers = self._auth_headers()
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/client.py", line 238, in _auth_headers
+    token = self.auth_manager.get_access_token(as_dict=False)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 535, in get_access_token
+    "code": code or self.get_auth_response(),
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 490, in get_auth_response
+    return self._get_auth_response_local_server(redirect_port)
+  File "/home/airflow/.local/lib/python3.8/site-packages/spotipy/oauth2.py", line 459, in _get_auth_response_local_server
+    server.handle_request()
+  File "/usr/local/lib/python3.8/socketserver.py", line 294, in handle_request
+    ready = selector.select(timeout)
+  File "/usr/local/lib/python3.8/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)
+  File "/home/airflow/.local/lib/python3.8/site-packages/airflow/models/taskinstance.py", line 2485, in signal_handler
+    raise AirflowException("Task received SIGTERM signal")
+airflow.exceptions.AirflowException: Task received SIGTERM signal
+[2024-04-13T18:41:24.719+0000] {taskinstance.py:1149} INFO - Marking task as FAILED. dag_id=token_refresher_50mins, task_id=refresh_token, execution_date=20240413T183943, start_date=20240413T183943, end_date=20240413T184124
+[2024-04-13T18:41:24.734+0000] {standard_task_runner.py:107} ERROR - Failed to execute job 23 for task refresh_token ((psycopg2.errors.ForeignKeyViolation) insert or update on table "task_fail" violates foreign key constraint "task_fail_ti_fkey"
+DETAIL:  Key (dag_id, task_id, run_id, map_index)=(token_refresher_50mins, refresh_token, manual__2024-04-13T18:39:43.097745+00:00, -1) is not present in table "task_instance".
+
+[SQL: INSERT INTO task_fail (task_id, dag_id, run_id, map_index, start_date, end_date, duration) VALUES (%(task_id)s, %(dag_id)s, %(run_id)s, %(map_index)s, %(start_date)s, %(end_date)s, %(duration)s) RETURNING task_fail.id]
+[parameters: {'task_id': 'refresh_token', 'dag_id': 'token_refresher_50mins', 'run_id': 'manual__2024-04-13T18:39:43.097745+00:00', 'map_index': -1, 'start_date': datetime.datetime(2024, 4, 13, 18, 39, 43, 918804, tzinfo=Timezone('UTC')), 'end_date': datetime.datetime(2024, 4, 13, 18, 41, 24, 712616, tzinfo=Timezone('UTC')), 'duration': 100}]
+(Background on this error at: https://sqlalche.me/e/14/gkpj); 491)
+[2024-04-13T18:41:24.789+0000] {process_utils.py:79} INFO - Process psutil.Process(pid=491, status='terminated', exitcode=1, started='18:39:43') (491) terminated with exit code 1

@@ -1,0 +1,19 @@
+[2024-04-17T02:59:28.672+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: create_simple_table.create_dataset manual__2024-04-17T02:59:26.174233+00:00 [queued]>
+[2024-04-17T02:59:28.684+0000] {taskinstance.py:1979} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: create_simple_table.create_dataset manual__2024-04-17T02:59:26.174233+00:00 [queued]>
+[2024-04-17T02:59:28.685+0000] {taskinstance.py:2193} INFO - Starting attempt 1 of 1
+[2024-04-17T02:59:28.696+0000] {taskinstance.py:2217} INFO - Executing <Task(BigQueryCreateEmptyDatasetOperator): create_dataset> on 2024-04-17 02:59:26.174233+00:00
+[2024-04-17T02:59:28.704+0000] {standard_task_runner.py:60} INFO - Started process 92 to run task
+[2024-04-17T02:59:28.709+0000] {standard_task_runner.py:87} INFO - Running: ['***', 'tasks', 'run', 'create_simple_table', 'create_dataset', 'manual__2024-04-17T02:59:26.174233+00:00', '--job-id', '404', '--raw', '--subdir', 'DAGS_FOLDER/big_conn.py', '--cfg-path', '/tmp/tmprhp6cqyo']
+[2024-04-17T02:59:28.713+0000] {standard_task_runner.py:88} INFO - Job 404: Subtask create_dataset
+[2024-04-17T02:59:28.773+0000] {task_command.py:423} INFO - Running <TaskInstance: create_simple_table.create_dataset manual__2024-04-17T02:59:26.174233+00:00 [running]> on host cf558aa106d3
+[2024-04-17T02:59:28.893+0000] {taskinstance.py:2513} INFO - Exporting env vars: AIRFLOW_CTX_DAG_EMAIL='' AIRFLOW_CTX_DAG_OWNER='Airflow' AIRFLOW_CTX_DAG_ID='create_simple_table' AIRFLOW_CTX_TASK_ID='create_dataset' AIRFLOW_CTX_EXECUTION_DATE='2024-04-17T02:59:26.174233+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2024-04-17T02:59:26.174233+00:00'
+[2024-04-17T02:59:28.910+0000] {connection.py:269} WARNING - Connection schemes (type: google_cloud_platform) shall not contain '_' according to RFC3986.
+[2024-04-17T02:59:28.911+0000] {base.py:83} INFO - Using connection ID 'google_cloud_default' for task execution.
+[2024-04-17T02:59:28.911+0000] {credentials_provider.py:353} INFO - Getting connection using `google.auth.default()` since no explicit credentials are provided.
+[2024-04-17T02:59:29.060+0000] {bigquery.py:470} INFO - datasetId was not specified in `dataset_reference`. Will use default value test_dataset.
+[2024-04-17T02:59:29.060+0000] {bigquery.py:470} INFO - projectId was not specified in `dataset_reference`. Will use default value spherical-door-420516.
+[2024-04-17T02:59:29.061+0000] {bigquery.py:481} INFO - Creating dataset: test_dataset in project: spherical-door-420516 
+[2024-04-17T02:59:30.239+0000] {bigquery.py:2045} INFO - Dataset test_dataset already exists.
+[2024-04-17T02:59:30.269+0000] {taskinstance.py:1149} INFO - Marking task as SUCCESS. dag_id=create_simple_table, task_id=create_dataset, execution_date=20240417T025926, start_date=20240417T025928, end_date=20240417T025930
+[2024-04-17T02:59:30.303+0000] {local_task_job_runner.py:234} INFO - Task exited with return code 0
+[2024-04-17T02:59:30.334+0000] {taskinstance.py:3312} INFO - 1 downstream tasks scheduled from follow-on schedule check
