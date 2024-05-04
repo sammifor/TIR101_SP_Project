@@ -17,21 +17,21 @@ from google.cloud.exceptions import NotFound
 from refresh_token_gcp import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
 
 # Variable.set("db_host", "sp_project-postgres-1")
-Variable.set("db_hostname", "postgres")
-Variable.set("db_port", "5432")
-Variable.set("db_name", "spotify")
-Variable.set("db_user", "airflow")
-Variable.set("db_password", "airflow")
+# Variable.set("db_hostname", "postgres")
+# Variable.set("db_port", "5432")
+# Variable.set("db_name", "spotify")
+# Variable.set("db_user", "airflow")
+# Variable.set("db_password", "airflow")
 Variable.set("broker", "broker:29092")
 Variable.set("group_id", "test-consumer-group")
 
 ## Getting Enviroment Variable ##
-db_host = Variable.get("db_host")
-db_hostname = Variable.get("db_hostname")
-db_port = Variable.get("db_port")
-db_name = Variable.get("db_name")
-db_user = Variable.get("db_user")
-db_password = Variable.get("db_password")
+# db_host = Variable.get("db_host")
+# db_hostname = Variable.get("db_hostname")
+# db_port = Variable.get("db_port")
+# db_name = Variable.get("db_name")
+# db_user = Variable.get("db_user")
+# db_password = Variable.get("db_password")
 broker = Variable.get("broker")
 group_id = Variable.get("group_id")
 
