@@ -1,38 +1,38 @@
-import random
-from datetime import datetime
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-import json
-from kafka3 import KafkaProducer, KafkaConsumer
-from kafka3.errors import kafka_errors
-from airflow.utils.task_group import TaskGroup
-import requests
-import logging
-import psycopg2
-from airflow.models import Variable
-import sys
-from utils.DiscordNotifier import DiscordNotifier
-from refresh_token import get_latest_ac_token, request_new_ac_token_refresh_token
-import time
+# import random
+# from datetime import datetime
+# from airflow import DAG
+# from airflow.operators.python import PythonOperator
+# import json
+# from kafka3 import KafkaProducer, KafkaConsumer
+# from kafka3.errors import kafka_errors
+# from airflow.utils.task_group import TaskGroup
+# import requests
+# import logging
+# import psycopg2
+# from airflow.models import Variable
+# import sys
+# from utils.DiscordNotifier import DiscordNotifier
+# from refresh_token import get_latest_ac_token, request_new_ac_token_refresh_token
+# import time
 
-# Variable.set("db_host", "sp_project-postgres-1")
-Variable.set("db_hostname", "postgres")
-Variable.set("db_port", "5432")
-Variable.set("db_name", "spotify")
-Variable.set("db_user", "airflow")
-Variable.set("db_password", "airflow")
-Variable.set("broker", "broker:29092")
-Variable.set("group_id", "test-consumer-group")
+# # Variable.set("db_host", "sp_project-postgres-1")
+# Variable.set("db_hostname", "postgres")
+# Variable.set("db_port", "5432")
+# Variable.set("db_name", "spotify")
+# Variable.set("db_user", "airflow")
+# Variable.set("db_password", "airflow")
+# Variable.set("broker", "broker:29092")
+# Variable.set("group_id", "test-consumer-group")
 
-## Getting Enviroment Variable ##
-db_host = Variable.get("db_host")
-db_hostname = Variable.get("db_hostname")
-db_port = Variable.get("db_port")
-db_name = Variable.get("db_name")
-db_user = Variable.get("db_user")
-db_password = Variable.get("db_password")
-broker = Variable.get("broker")
-group_id = Variable.get("group_id")
+# ## Getting Enviroment Variable ##
+# db_host = Variable.get("db_host")
+# db_hostname = Variable.get("db_hostname")
+# db_port = Variable.get("db_port")
+# db_name = Variable.get("db_name")
+# db_user = Variable.get("db_user")
+# db_password = Variable.get("db_password")
+# broker = Variable.get("broker")
+# group_id = Variable.get("group_id")
 
 
 ## you may change the email to yours, if you want to change the sender's info, you may go config/airflow.cfg replace [smpt] related information.
