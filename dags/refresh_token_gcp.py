@@ -17,7 +17,7 @@ And this will be uploaded to GCP
 
 def create_bigquery_client():
     try:
-        credentials = service_account.Credentials.from_service_account_file('/opt/airflow/cloud/spherical-door-420516-1e291d606342.json')
+        credentials = service_account.Credentials.from_service_account_file('/opt/airflow/cloud/affable-hydra-422306-r3-e77d83c42f33.json')
         client = bigquery.Client(credentials=credentials)
         return client
     except Exception as e:
@@ -28,7 +28,7 @@ def get_latest_ac_token_gcp():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `spherical-door-420516.airflow.tokens` ORDER BY access_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.tokens` ORDER BY access_last_update DESC LIMIT 1")
         rows = query_job.result()
 
         logging.info("Fetching latest access token from BigQuery...")
@@ -40,7 +40,7 @@ def get_latest_refresh_token_gcp():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `spherical-door-420516.airflow.tokens` ORDER BY refresh_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens` ORDER BY refresh_last_update DESC LIMIT 1")
         rows = query_job.result()
         logging.info("Fetching latest refresh token from BigQuery...")
         for row in rows:
