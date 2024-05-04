@@ -11,7 +11,7 @@ from airflow.models import Variable
 import sys
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from dags.refresh_token_gcp import create_bigquery_client
+from refresh_token_gcp import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from refresh_token_gcp import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
