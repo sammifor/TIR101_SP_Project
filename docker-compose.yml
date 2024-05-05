@@ -66,8 +66,8 @@ x-airflow-common:
 
     # Google cloud credentials
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: "google-cloud-platform://"
-    GOOGLE_APPLICATION_CREDENTIALS: "/opt/airflow/cloud/spherical-door-420516-1e291d606342.json"
-    GOOGLE_CLOUD_PROJECT: "spherical-door-420516"
+    GOOGLE_APPLICATION_CREDENTIALS: "/opt/airflow/cloud/affable-hydra-422306-r3-48540d47aef8.json"
+    GOOGLE_CLOUD_PROJECT: "affable-hydra-422306-r3"
 
     # yamllint disable rule:line-length
     # Use simple http server on scheduler for health checks

@@ -17,7 +17,11 @@ And this will be uploaded to GCP
 
 def create_bigquery_client():
     try:
+<<<<<<< HEAD
         credentials = service_account.Credentials.from_service_account_file('/opt/airflow/cloud/affable-hydra-422306-r3-e77d83c42f33.json')
+=======
+        credentials = service_account.Credentials.from_service_account_file('/opt/airflow/cloud/affable-hydra-422306-r3-48540d47aef8.json')
+>>>>>>> 3cd1bf42f07dd8affc49a604fc286e8649e6b46c
         client = bigquery.Client(credentials=credentials)
         return client
     except Exception as e:
