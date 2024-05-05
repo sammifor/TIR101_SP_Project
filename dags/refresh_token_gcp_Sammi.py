@@ -17,7 +17,7 @@ And this will be uploaded to GCP
 
 def create_bigquery_client():
     try:
-        credentials = service_account.Credentials.from_service_account_file('/opt/airflow/cloud/affable-hydra-422306-r3-48540d47aef8.json')
+        credentials = service_account.Credentials.from_service_account_file('/opt/airflow/dags/cloud/affable-hydra-422306-r3-e77d83c42f33.json')
         client = bigquery.Client(credentials=credentials)
         return client
     except Exception as e:
@@ -28,7 +28,7 @@ def get_latest_ac_token_gcp():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens` ORDER BY access_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi` ORDER BY access_last_update DESC LIMIT 1")
         rows = query_job.result()
 
         logging.info("Fetching latest access token from BigQuery...")
@@ -40,9 +40,10 @@ def get_latest_refresh_token_gcp():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens` ORDER BY refresh_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi` ORDER BY refresh_last_update DESC LIMIT 1")
         rows = query_job.result()
         logging.info("Fetching latest refresh token from BigQuery...")
+        
         for row in rows:
             row_dict = dict(row)
             return row_dict["refresh_token"]
@@ -51,13 +52,13 @@ def get_latest_refresh_token_gcp():
 def request_new_ac_token_refresh_token_gcp():
 
     refresh_token = get_latest_refresh_token_gcp()
-    client_id = '3140d7f560664be9a52544791c13b670'
-    client_secret = 'cfb94502d418483a9fa631e4d7d23691'
+    client_id = '0b07e97031a14363b458101e3d61b122'
+    client_secret = '361241d37a1c4a1d84ae97522ad4bb9a'
     credentials = f"{client_id}:{client_secret}"
     encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
 
     data = {
-        'client_id': '3140d7f560664be9a52544791c13b670',
+        'client_id': '0b07e97031a14363b458101e3d61b122',
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token
     }
@@ -65,6 +66,7 @@ def request_new_ac_token_refresh_token_gcp():
                'Authorization': f"Basic {encoded_credentials}",
                }
     response = requests.post('https://accounts.spotify.com/api/token', data=data, headers=headers,timeout=10)
+    logging.info(response.text)
     access_token = response.json()['access_token']
     if 'refresh_token' not in response.json():
         refresh_token = refresh_token
@@ -76,7 +78,7 @@ def request_new_ac_token_refresh_token_gcp():
     with client:
         try:
             query_job = client.query(
-                f"INSERT INTO airflow.tokens (access_token, access_last_update, refresh_token, refresh_last_update) \
+                f"INSERT INTO airflow.tokens_Sammi (access_token, access_last_update, refresh_token, refresh_last_update) \
                 VALUES ('{access_token}', {current_timestamp}, '{refresh_token}', {current_timestamp})"
             )
             logging.info(f"Token successfully updated: {access_token}")
