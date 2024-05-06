@@ -7,15 +7,16 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token_gcp_Sammi import create_bigquery_client
+from refresh_token_gcp_Sammi2 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token_gcp_Sammi2 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
+import urllib3
+urllib3.disable_warnings()
 
-PATH = '/opt/airflow/dags/cloud/affable-hydra-422306-r3-e77d83c42f33.json'
 
 ## you may change the email to yours, if you want to change the sender's info, you may go config/airflow.cfg replace [smpt] related information.
 default_args = {
@@ -81,13 +82,14 @@ def related_artist_data(**context):
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-site",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Connection": "close"
     }
 
         logging.info(f"Using access_token:{access_token}")
         related_artist_url = f"https://api.spotify.com/v1/artists/{artist_uri}/related-artists"
 
-        response = requests.get(related_artist_url, headers=headers)
+        response = requests.get(related_artist_url, headers=headers,verify=False)
 
         while response.status_code == 429:
             logging.info(f"Reach the request limitation, doing time sleep now!")
@@ -95,6 +97,7 @@ def related_artist_data(**context):
             response = requests.get(
                 related_artist_url,
                 headers=headers,
+                verify=False
             )
             
         if response.status_code != 200 and response.status_code != 429:# token expired
@@ -117,8 +120,10 @@ def related_artist_data(**context):
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-site",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Connection": "close"
         },
+        verify=False
             )
         artist_data = response.json()
 

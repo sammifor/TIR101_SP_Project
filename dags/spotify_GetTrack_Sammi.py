@@ -7,13 +7,15 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token_gcp_Sammi import create_bigquery_client
+from refresh_token_gcp_Sammi3 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token_gcp_Sammi3 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
+import urllib3
+urllib3.disable_warnings()
 
 ## you may change the email to yours, if you want to change the sender's info, you may go config/airflow.cfg replace [smpt] related information.
 default_args = {
@@ -79,21 +81,18 @@ def get_track_data(**context):
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-site",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Connection": "close"    
     }
 
         logging.info(f"Using access_token:{access_token}")
         get_track_url = f"https://api.spotify.com/v1/tracks/{track_uri}"
 
-        response = requests.get(get_track_url, headers=headers)
+        response = requests.get(get_track_url, headers=headers,verify=False)
 
         while response.status_code == 429:
             logging.info(f"Reach the request limitation, doing time sleep now!")
             time.sleep(30)
-            response = requests.get(
-                get_track_url,
-                headers=headers,
-            )
             
         if response.status_code != 200 and response.status_code != 429:# token expired
             logging.info(f"Request a new token for retry")
@@ -115,14 +114,16 @@ def get_track_data(**context):
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-site",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Connection": "close"
         },
+        verify=False
             )
         track_data = response.json()
 
         trackData_list.append(track_data)
 
-        n = random.randint(1,3) ## gen 1~3s
+        n = random.randint(1,5) ## gen 1~3s
         time.sleep(n)
 
     with open('/opt/airflow/dags/rawdata/data_track.json','w') as f:
@@ -131,7 +132,7 @@ def get_track_data(**context):
 
 def store_data_in_gcs():
     
-    with open('/opt/airflow/dags/rawdata/data_track','r') as f:
+    with open('/opt/airflow/dags/rawdata/data_track.json','r') as f:
         trackData_list = json.load(f)
     
     #Extend data

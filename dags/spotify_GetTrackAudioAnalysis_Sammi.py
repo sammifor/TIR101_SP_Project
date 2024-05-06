@@ -14,6 +14,8 @@ from refresh_token_gcp_Sammi import get_latest_ac_token_gcp, request_new_ac_toke
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
+import urllib3
+urllib3.disable_warnings()
 
 ## you may change the email to yours, if you want to change the sender's info, you may go config/airflow.cfg replace [smpt] related information.
 default_args = {
@@ -79,13 +81,14 @@ def get_track_audio_analysis_data(**context):
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-site",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+        "Connection": "close"
     }
 
         logging.info(f"Using access_token:{access_token}")
         get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
-        response = requests.get(get_track_url, headers=headers)
+        response = requests.get(get_track_url, headers=headers,verify=False)
 
         while response.status_code == 429:
             logging.info(f"Reach the request limitation, doing time sleep now!")
@@ -93,6 +96,7 @@ def get_track_audio_analysis_data(**context):
             response = requests.get(
                 get_track_url,
                 headers=headers,
+                verify=False
             )
             
         if response.status_code != 200 and response.status_code != 429:# token expired
@@ -115,8 +119,10 @@ def get_track_audio_analysis_data(**context):
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-site",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Connection": "close"
         },
+        verify=False
             )
         track_data = response.json()
 
@@ -131,7 +137,7 @@ def get_track_audio_analysis_data(**context):
 
 def store_data_in_gcs():
     
-    with open('/opt/airflow/dags/rawdata/trackOfAudioAnalysis17_21','r') as f:
+    with open('/opt/airflow/dags/rawdata/trackOfAudioAnalysis17_21.json','r') as f:
         trackAudioAnalysis_list = json.load(f)
     
     #getTrackUri

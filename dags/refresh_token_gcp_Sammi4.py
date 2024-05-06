@@ -28,7 +28,7 @@ def get_latest_ac_token_gcp():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi` ORDER BY access_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi4` ORDER BY access_last_update DESC LIMIT 1")
         rows = query_job.result()
 
         logging.info("Fetching latest access token from BigQuery...")
@@ -40,7 +40,7 @@ def get_latest_refresh_token_gcp():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi` ORDER BY refresh_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi4` ORDER BY refresh_last_update DESC LIMIT 1")
         rows = query_job.result()
         logging.info("Fetching latest refresh token from BigQuery...")
         
@@ -52,13 +52,13 @@ def get_latest_refresh_token_gcp():
 def request_new_ac_token_refresh_token_gcp():
 
     refresh_token = get_latest_refresh_token_gcp()
-    client_id = '95bc737525694faead5476cc2d2fb835'
-    client_secret = '3fa393cd2ec44d8c9bfc900dc9406889'
+    client_id = '00e6f8a36a70442bbea73ff60a2b1fc3'
+    client_secret = '8c92e47ddcce4bf3a0585c80d658defa'
     credentials = f"{client_id}:{client_secret}"
     encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
 
     data = {
-        'client_id': '95bc737525694faead5476cc2d2fb835',
+        'client_id': '00e6f8a36a70442bbea73ff60a2b1fc3',
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token
     }
@@ -78,7 +78,7 @@ def request_new_ac_token_refresh_token_gcp():
     with client:
         try:
             query_job = client.query(
-                f"INSERT INTO airflow.tokens_Sammi (access_token, access_last_update, refresh_token, refresh_last_update) \
+                f"INSERT INTO airflow.tokens_Sammi4 (access_token, access_last_update, refresh_token, refresh_last_update) \
                 VALUES ('{access_token}', {current_timestamp}, '{refresh_token}', {current_timestamp})"
             )
             logging.info(f"Token successfully updated: {access_token}")
