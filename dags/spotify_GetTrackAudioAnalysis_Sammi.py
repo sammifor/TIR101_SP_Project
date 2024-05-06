@@ -7,10 +7,10 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token_gcp_Sammi import create_bigquery_client
+from refresh_token_gcp_Sammi1 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token_gcp_Sammi1 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
@@ -65,6 +65,7 @@ def get_track_audio_analysis_data(**context):
     access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token', key='access_token')
 
     trackAudioAnalysis_list = []
+    r_count = 0
     for track_uri in track_uris:
         headers = {
         "authority": "api.spotify.com",
@@ -100,7 +101,7 @@ def get_track_audio_analysis_data(**context):
             )
             
         if response.status_code != 200 and response.status_code != 429:# token expired
-            logging.info(f"Request a new token for retry")
+            logging.info(f"{response.status_code} Request a new token for retry")
             access_token = request_new_ac_token_refresh_token_gcp()
             response = requests.get(
                 get_track_url,
@@ -124,12 +125,20 @@ def get_track_audio_analysis_data(**context):
         },
         verify=False
             )
+        
         track_data = response.json()
 
         trackAudioAnalysis_list.append(track_data)
 
-        n = random.randint(1,3) ## gen 1~3s
+        logging.info(f'{r_count} - get trackAudioAnalysis_list success!')
+
+        n = random.randint(1,5) 
         time.sleep(n)
+
+        r_count += 1
+        if r_count == 180:
+            time.sleep(70)
+            r_count = 0
 
     with open('/opt/airflow/dags/rawdata/trackOfAudioAnalysis17_21.json','w') as f:
         json.dump(trackAudioAnalysis_list,f)

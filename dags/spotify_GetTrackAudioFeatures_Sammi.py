@@ -7,10 +7,10 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token_gcp_Sammi1 import create_bigquery_client
+from refresh_token_gcp_Sammi import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi1 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token_gcp_Sammi import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
@@ -65,6 +65,7 @@ def get_track_audio_features_data(**context):
     access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token', key='access_token')
 
     trackAudioFeatures_list = []
+    r_count = 0
     for track_uri in track_uris:
         headers = {
         "authority": "api.spotify.com",
@@ -123,8 +124,14 @@ def get_track_audio_features_data(**context):
         track_data = response.json()
         trackAudioFeatures_list.append(track_data)
 
-        n = random.randint(1,3) ## gen 1~3s
+        n = random.randint(1,5) ## gen 1~5s
         time.sleep(n)
+
+        r_count += 1
+        if r_count == 150:
+            time.sleep(70)
+            logging.info(f'{r_count} : time sleep 70s now!')
+            r_count = 0
 
     with open('/opt/airflow/dags/rawdata/datatrackAudioFeatures.json','w') as f:
         json.dump(trackAudioFeatures_list,f)
@@ -139,7 +146,7 @@ def store_data_in_gcs():
     df_trackAudioFeatures = pd.json_normalize(trackAudioFeatures_list)
 
     #Upload to GCS
-    local_file_path = 'getTrack.csv'
+    local_file_path = 'trackAudioFeatures.csv'
     gcs_bucket = 'api_spotify_artists_tracks'
     gcs_file_name = f'output/{local_file_path}'
 

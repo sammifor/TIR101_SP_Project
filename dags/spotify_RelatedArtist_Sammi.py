@@ -10,7 +10,7 @@ import time
 from refresh_token_gcp_Sammi2 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi2 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token_gcp_Sammi2 import get_latest_ac_token_gcp1, request_new_ac_token_refresh_token_gcp1
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
@@ -31,12 +31,12 @@ default_args = {
 
 def check_if_need_update_token(**context):
     current_timestamp = int(time.time())
-    ac_dict = get_latest_ac_token_gcp()
+    ac_dict = get_latest_ac_token_gcp1()
     access_token = ac_dict["access_token"]
     last_ac_time = ac_dict["access_last_update"]
 
     if last_ac_time + 3000 < current_timestamp: # means token has been expired, default is 3600, make it 3000 to ensure we have enough time
-        access_token = request_new_ac_token_refresh_token_gcp()
+        access_token = request_new_ac_token_refresh_token_gcp1()
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 
@@ -102,7 +102,7 @@ def related_artist_data(**context):
             
         if response.status_code != 200 and response.status_code != 429:# token expired
             logging.info(f"Request a new token for retry")
-            access_token = request_new_ac_token_refresh_token_gcp()
+            access_token = request_new_ac_token_refresh_token_gcp1()
             response = requests.get(
                 related_artist_url,
                 headers = {

@@ -24,7 +24,7 @@ def create_bigquery_client():
         print(f"Error connecting to Google Cloud BigQuery: {e}")
         return None
 
-def get_latest_ac_token_gcp():
+def get_latest_ac_token_gcp2():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
@@ -49,16 +49,15 @@ def get_latest_refresh_token_gcp():
             return row_dict["refresh_token"]
 
 
-def request_new_ac_token_refresh_token_gcp():
-
+def request_new_ac_token_refresh_token_gcp2():
     refresh_token = get_latest_refresh_token_gcp()
-    client_id = '7705f3583e9846299887e069deae8af9'
-    client_secret = 'd6887b5344ad45308fe3cd1103735423'
+    client_id = '58b97e9b97a341c1bb230ac64818975c'
+    client_secret = '1aad4323f60a4e2e8e4c37e096d5feee'
     credentials = f"{client_id}:{client_secret}"
     encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
 
     data = {
-        'client_id': '7705f3583e9846299887e069deae8af9',
+        'client_id': '58b97e9b97a341c1bb230ac64818975c',
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token
     }

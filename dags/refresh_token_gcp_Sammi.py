@@ -52,13 +52,13 @@ def get_latest_refresh_token_gcp():
 def request_new_ac_token_refresh_token_gcp():
 
     refresh_token = get_latest_refresh_token_gcp()
-    client_id = '95bc737525694faead5476cc2d2fb835'
-    client_secret = '3fa393cd2ec44d8c9bfc900dc9406889'
+    client_id = '2d049f6d149145ed97d3b57e314de053'
+    client_secret = '827da9fe792640b983e96480dcef4d2f'
     credentials = f"{client_id}:{client_secret}"
     encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
 
     data = {
-        'client_id': '95bc737525694faead5476cc2d2fb835',
+        'client_id': '2d049f6d149145ed97d3b57e314de053',
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token
     }

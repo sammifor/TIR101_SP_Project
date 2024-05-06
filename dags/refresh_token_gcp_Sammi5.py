@@ -24,11 +24,11 @@ def create_bigquery_client():
         print(f"Error connecting to Google Cloud BigQuery: {e}")
         return None
 
-def get_latest_ac_token_gcp1():
+def get_latest_ac_token_gcp2():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi4` ORDER BY access_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi5` ORDER BY access_last_update DESC LIMIT 1")
         rows = query_job.result()
 
         logging.info("Fetching latest access token from BigQuery...")
@@ -40,7 +40,7 @@ def get_latest_refresh_token_gcp():
     client = create_bigquery_client()
     with client:
         query_job = client.query(
-            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi4` ORDER BY refresh_last_update DESC LIMIT 1")
+            "SELECT * FROM `affable-hydra-422306-r3.airflow.tokens_Sammi5` ORDER BY refresh_last_update DESC LIMIT 1")
         rows = query_job.result()
         logging.info("Fetching latest refresh token from BigQuery...")
         
@@ -49,16 +49,16 @@ def get_latest_refresh_token_gcp():
             return row_dict["refresh_token"]
 
 
-def request_new_ac_token_refresh_token_gcp1():
+def request_new_ac_token_refresh_token_gcp2():
 
     refresh_token = get_latest_refresh_token_gcp()
-    client_id = '1c8ee769d1194b51a43b27b395531786'
-    client_secret = '8b2a080187a44d25b8cf0aa21d83c1d4'
+    client_id = 'd918c1f99b5e44a0bfaee7f27b5af7ec'
+    client_secret = '39f61182a4ee4ce3b7035b255fd2562e'
     credentials = f"{client_id}:{client_secret}"
     encoded_credentials = base64.b64encode(credentials.encode('utf-8')).decode('utf-8')
 
     data = {
-        'client_id': '1c8ee769d1194b51a43b27b395531786',
+        'client_id': 'd918c1f99b5e44a0bfaee7f27b5af7ec',
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token
     }
@@ -78,7 +78,7 @@ def request_new_ac_token_refresh_token_gcp1():
     with client:
         try:
             query_job = client.query(
-                f"INSERT INTO airflow.tokens_Sammi4 (access_token, access_last_update, refresh_token, refresh_last_update) \
+                f"INSERT INTO airflow.tokens_Sammi5 (access_token, access_last_update, refresh_token, refresh_last_update) \
                 VALUES ('{access_token}', {current_timestamp}, '{refresh_token}', {current_timestamp})"
             )
             logging.info(f"Token successfully updated: {access_token}")
