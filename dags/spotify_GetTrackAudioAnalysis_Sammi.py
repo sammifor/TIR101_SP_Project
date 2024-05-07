@@ -10,7 +10,7 @@ import time
 from refresh_token_gcp_Sammi1 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi1 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token_gcp_Sammi import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage

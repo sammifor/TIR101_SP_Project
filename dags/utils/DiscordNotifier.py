@@ -12,7 +12,7 @@ class DiscordNotifier(BaseNotifier):
 
     def notify(self, context):
         # Send notification here, below is an example
-        title = f">>Check DAG {context['dag'].dag_id} Task {context['task_instance'].task_id}"
+        title = f">>Check DAG - {context['dag'].dag_id} Task - {context['task_instance'].task_id} Log - {context['task_instance'].log_url}"
         self.notifier.send(self.msg + title, True)
 
 
