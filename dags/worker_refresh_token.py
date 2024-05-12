@@ -16,10 +16,14 @@ def get_latest_ac_token(current_worker):
             ORDER BY access_last_update DESC LIMIT 1
         """
         query_job = client.query(query)
-        row = query_job.result()
+        rows = query_job.result()
         logging.info("Fetching latest refresh token from BigQuery...")
         # access_token, access_last_update, refresh_token, refresh_last_update
-    return row
+        for row in rows:
+            # 返回第一行
+            return row
+        # 如果沒有行數據，返回 None 或者其他適當的值
+        return None
 
 # get current workers' refresh token from GCP
 def get_latest_refresh_token(current_worker):
@@ -31,10 +35,14 @@ def get_latest_refresh_token(current_worker):
         ORDER BY refresh_last_update DESC LIMIT 1
         """
         query_job = client.query(query)
-        row = query_job.result()
+        rows = query_job.result()
         logging.info("Fetching latest refresh token from BigQuery...")
         # access_token, access_last_update, refresh_token, refresh_last_update
-    return row
+        for row in rows:
+            # 返回第一行
+            return row
+        # 如果沒有行數據，返回 None 或者其他適當的值
+        return None
 
 
 def request_new_ac_token_refresh_token(current_worker,client_id,client_secret):
@@ -53,7 +61,8 @@ def request_new_ac_token_refresh_token(current_worker,client_id,client_secret):
     headers = {'content-type': 'application/x-www-form-urlencoded',
                'Authorization': f"Basic {encoded_credentials}",
                }
-    response = requests.post('https://accounts.spotify.com/api/token', data=data, headers=headers,timeout=4)
+    response = requests.post('https://accounts.spotify.com/api/token', data=data, headers=headers,timeout=10)
+    logging.info(response.text)
     access_token = response.json()['access_token']
     if 'refresh_token' not in response.json():
         refresh_token = refresh_token

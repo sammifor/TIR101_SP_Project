@@ -52,7 +52,8 @@ def check_if_need_update_token(start_time, current_worker_name, current_worker, 
     if access_last_update + 3500 <= current_time: # means token has been expired, default is 3600, make it 3500 to ensure we have enough time
         access_token = request_new_ac_token_refresh_token(current_worker_name,
         current_worker["client_id"], current_worker["client_secret"])
-        elapsed_time = current_time - start_time
+    
+    elapsed_time = current_time - start_time
     if elapsed_time >= 10:
         start_time = current_time
         print("Doing switch worker !!")
@@ -78,9 +79,9 @@ def get_track_data():
 
     for track_uri in track_uris:
 
-        if is_last_uri_last_in_list(track_uri, track_uris[-1]):
+        if not is_last_uri_last_in_list(track_uris, track_uris):
 
-            access_token = check_if_need_update_token(start_time, current_worker_name, current_worker)
+            access_token = check_if_need_update_token(start_time, current_worker_name, current_worker, worker_cycle)
             
             trackData_list = []
             headers = {
@@ -103,10 +104,10 @@ def get_track_data():
                 get_track_url = f"https://api.spotify.com/v1/tracks/{track_uri}"
                 response = requests.get(get_track_url, headers=headers, verify=False)
                 
-                while response.status_code == 429:
+                if response.status_code == 429:
                     logging.info(f"Reach the request limitation, change the worker now!")
                     time.sleep(10)
-                    access_token = check_if_need_update_token(start_time, current_worker_name, current_worker)
+                    access_token = check_if_need_update_token(start_time, current_worker_name, current_worker, worker_cycle)
                     response = requests.get(get_track_url,
                                             headers={
                                                 'accept': '*/*',
@@ -125,21 +126,11 @@ def get_track_data():
                                                 'Connection': 'close',
                                             },
                                             verify=False)
-                    
-                    client = get_storage_client(CREDENTIAL_PATH)
-
-                    progress = {
-                        "last_track_uri": track_uri,
-                        "trackData_list": trackData_list
-                    }
-
-                    save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
-                    # save progress to GCS
 
                 track_data = response.json()
                 trackData_list.append(track_data)
                 
-                n = random.randint(1)  ## gen 1~3s
+                n = random.randint(1,3)  ## gen 1~3s
                 time.sleep(n)
 
                 count += 1
@@ -147,7 +138,7 @@ def get_track_data():
                 track_data = response.json()
                 trackData_list.append(track_data)
 
-                n = random.randint(1)  ## gen 1~3s
+                n = random.randint(1,3)  ## gen 1~3s
                 time.sleep(n)
 
                 #每100筆睡2秒
@@ -178,7 +169,7 @@ def get_track_data():
   
     client=get_bq_client(CREDENTIAL_PATH)
     save_progress_to_gcs(client, trackAudioFeatures_list, BUCKET_FILE_PATH)
-    logging.info("If you see this, means you get the whole data from get_track API!")
+    logging.info(f"If you see this, means you get the whole data - {len(trackAudioFeatures_list)} from get_track API!")
 
 def process_data_in_gcs():
     
