@@ -129,14 +129,9 @@ def get_track_data():
 
                 track_data = response.json()
                 trackData_list.append(track_data)
-                
-                n = random.randint(1,3)  ## gen 1~3s
-                time.sleep(n)
 
                 count += 1
-                
-                track_data = response.json()
-                trackData_list.append(track_data)
+                logging.info(f"{count}-{track_uri}")
 
                 n = random.randint(1,3)  ## gen 1~3s
                 time.sleep(n)
