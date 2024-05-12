@@ -8,7 +8,7 @@ from utils.DiscordNotifier import DiscordNotifier
 import pandas as pd
 from google.cloud import bigquery
 from utils.GCP_client import get_bq_client, get_storage_client, load_gcs_to_bigquery
-
+import os 
 default_args = {
     'owner': 'airflow',
     'start_date': datetime(2024, 4, 2),
@@ -19,7 +19,7 @@ default_args = {
     'on_success_callback': DiscordNotifier(msg=" ✅️Task Run Success!✅")
 }
 
-CREDENTIAL_PATH = "./dags/cloud/affable-hydra-422306-r3-e77d83c42f33.json"
+CREDENTIAL_PATH = os.environ.get('CREDENTIAL_PATH')
 RAWDATA_2017 = "affable-hydra-422306-r3.airflow.raw_data_20170101_20171231"
 RAWDATA_2018 = "affable-hydra-422306-r3.airflow.raw_data_20180101_20181231"
 RAWDATA_2019 = "affable-hydra-422306-r3.airflow.raw_data_20190101_20191231"

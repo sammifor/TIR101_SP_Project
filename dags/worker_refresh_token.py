@@ -1,50 +1,45 @@
-import json
 import requests
 import base64
-import psycopg2
 import time
+from utils.GCP_client import get_bq_client
+import os 
+import logging
 
-def create_connection():
-    try:
-        conn = psycopg2.connect(
-            dbname='spotify',
-            user='airflow',
-            password='airflow',
-            host='localhost',
-            port='5432'
-        )
-        return conn
-    except Exception as e:
-        print(f"Error connecting to the database: {e}")
-        return None
+CREDENTIAL_PATH = os.environ.get('CREDENTIAL_PATH')
 
 def get_latest_ac_token(current_worker):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        f"select * from {current_worker}\n"
-        f"order by access_last_update desc limit 1"
-    )
-    rows = cursor.fetchall()
-      # Assuming access_token is the first column and refresh_token is the second column
-    return rows[0]
+    client = get_bq_client(CREDENTIAL_PATH)
+    with client:
+        query = f"""
+            SELECT * 
+            FROM affable-hydra-422306-r3.worker.{current_worker}
+            ORDER BY access_last_update DESC LIMIT 1
+        """
+        query_job = client.query(query)
+        row = query_job.result()
+        logging.info("Fetching latest refresh token from BigQuery...")
+        # access_token, access_last_update, refresh_token, refresh_last_update
+    return row
 
-
+# get current workers' refresh token from GCP
 def get_latest_refresh_token(current_worker):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute(
-        f"select * from {current_worker}\n"
-        f"order by refresh_last_update desc limit 1"
-    )
-    rows = cursor.fetchall()
-      # Assuming access_token is the first column and refresh_token is the second column
-    return rows[0]
+    client = get_bq_client(CREDENTIAL_PATH)
+    with client:
+        query = f"""
+        SELECT * 
+        FROM affable-hydra-422306-r3.worker.{current_worker}
+        ORDER BY refresh_last_update DESC LIMIT 1
+        """
+        query_job = client.query(query)
+        row = query_job.result()
+        logging.info("Fetching latest refresh token from BigQuery...")
+        # access_token, access_last_update, refresh_token, refresh_last_update
+    return row
 
 
 def request_new_ac_token_refresh_token(current_worker,client_id,client_secret):
 
-    refresh_token = get_latest_refresh_token(current_worker)[2]
+    refresh_token = get_latest_refresh_token(current_worker)
     client_id = client_id
     client_secret = client_secret
     credentials = f"{client_id}:{client_secret}"
@@ -66,16 +61,15 @@ def request_new_ac_token_refresh_token(current_worker,client_id,client_secret):
         refresh_token = response.json()['refresh_token']
 
 
-    conn = create_connection()
-    cursor = conn.cursor()
+    client = get_bq_client(CREDENTIAL_PATH)
     current_timestamp = int(time.time())
     try:
-        cursor.execute(
-            f"INSERT INTO {current_worker} (access_token, access_last_update, refresh_token, refresh_last_update) \
-             VALUES (%s, %s, %s, %s)",
-            (access_token, current_timestamp, refresh_token, current_timestamp)
-        )
-        conn.commit()
+        query = f"""
+            INSERT INTO {current_worker} (access_token, access_last_update, refresh_token, refresh_last_update)
+            VALUES (%s, %s, %s, %s)",
+            (access_token, {current_timestamp}, refresh_token, {current_timestamp})
+        """
+        client.query(query)
         print(f"Token successfully updated: {access_token}")
         return access_token
 

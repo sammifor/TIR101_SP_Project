@@ -46,6 +46,8 @@
 ---
 x-airflow-common:
   &airflow-common
+  env_file:
+    - .env
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
@@ -66,7 +68,7 @@ x-airflow-common:
 
     # Google cloud credentials
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: "google-cloud-platform://"
-    GOOGLE_APPLICATION_CREDENTIALS: "/opt/airflow/cloud/affable-hydra-422306-r3-48540d47aef8.json"
+    GOOGLE_APPLICATION_CREDENTIALS: "/opt/airflow/cloud/affable-hydra-422306-r3-e77d83c42f33.json"
     GOOGLE_CLOUD_PROJECT: "affable-hydra-422306-r3"
 
     # yamllint disable rule:line-length
@@ -156,7 +158,53 @@ services:
 
   airflow-worker:
     <<: *airflow-common
-    command: celery worker
+    command: celery worker -H worker1
+    healthcheck:
+      # yamllint disable rule:line-length
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    environment:
+      <<: *airflow-common-env
+      # Required to handle warm shutdown of the celery workers properly
+      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
+      DUMB_INIT_SETSID: "0"
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+  
+  airflow-worker2:
+    <<: *airflow-common
+    command: celery worker -H worker2
+    healthcheck:
+      # yamllint disable rule:line-length
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    environment:
+      <<: *airflow-common-env
+      # Required to handle warm shutdown of the celery workers properly
+      # See https://airflow.apache.org/docs/docker-stack/entrypoint.html#signal-propagation
+      DUMB_INIT_SETSID: "0"
+    restart: always
+    depends_on:
+      <<: *airflow-common-depends-on
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-worker3:
+    <<: *airflow-common
+    command: celery worker -H worker3
     healthcheck:
       # yamllint disable rule:line-length
       test:
