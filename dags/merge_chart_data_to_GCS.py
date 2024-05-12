@@ -4,7 +4,6 @@ from airflow.operators.python import PythonOperator
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import pandas as pd
-from google.cloud import bigquery
 from utils.GCP_client import get_bq_client, get_storage_client,load_gcs_to_bigquery
 
 default_args = {
@@ -64,32 +63,21 @@ def merge_output_gcs():
                    'gs://api_spotify_artists_tracks/changeDataType/2021.csv', 'gs://api_spotify_artists_tracks/changeDataType/2022.csv',
                    'gs://api_spotify_artists_tracks/changeDataType/2023.csv', 'gs://api_spotify_artists_tracks/changeDataType/2024.csv'] 
 
+    merged_data = merge_csv_files(input_files)
+    save_to_gcs(file_name = "expand_table_2017_2024", progress = merged_data)
+     
+def export_to_BQ():
+    
+    # schema = [
+    #     bigquery.SchemaField("column1", "STRING"),
+    #     bigquery.SchemaField("column2", "INTEGER"),
+    # ]
     load_gcs_to_bigquery(
-        gcs_uri=input_files,
+        gcs_uri=f"gs://api_spotify_artists_tracks/changeDataType/expand_table_2017_2024.csv",
         dataset_id='stage_ChangeDataType',
         table_id=f'expand_table_2017_2024',
-        external_source_format='CSV',
-        schema = [
-                bigquery.SchemaField("chart_date", "DATE"),
-                bigquery.SchemaField("missingRequiredFields", "BOOLEAN"),
-                bigquery.SchemaField("update_time", "INTEGER"),
-                bigquery.SchemaField("currentRank", "INTEGER"),
-                bigquery.SchemaField("previousRank", "INTEGER"),
-                bigquery.SchemaField("peakRank", "INTEGER"),
-                bigquery.SchemaField("peakDate", "DATE"),
-                bigquery.SchemaField("appearancesOnChart", "INTEGER"),
-                bigquery.SchemaField("consecutiveAppearancesOnChart", "INTEGER"),
-                bigquery.SchemaField("entryStatus", "STRING"),
-                bigquery.SchemaField("entryRank", "INTEGER"),
-                bigquery.SchemaField("entryDate", "DATE"),
-                bigquery.SchemaField("rankingMetric_value", "INTEGER"),
-                bigquery.SchemaField("trackName", "STRING"),
-                bigquery.SchemaField("trackUri", "STRING"),
-                bigquery.SchemaField("releaseDate", "DATE"),
-                bigquery.SchemaField("artist_name", "STRING"),
-                bigquery.SchemaField("artistUri", "STRING"),
-                bigquery.SchemaField("labels", "STRING"),
-            ]
+        schema=None,
+        skip_rows=1
     )
 
 with DAG('merge_chart_data_to_GCS.py',
@@ -103,7 +91,13 @@ with DAG('merge_chart_data_to_GCS.py',
         provide_context=True,
     )
 
-    merge_output_gcs
+    export_to_BQ = PythonOperator(
+        task_id='export_to_BQ',
+        python_callable=export_to_BQ,
+        provide_context=True,
+    )
+    
+    merge_output_gcs >> export_to_BQ
 
 
 
