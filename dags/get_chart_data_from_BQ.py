@@ -94,18 +94,33 @@ def expand_and_change_datatype():
 
 def export_to_BQ():
     
-    # schema = [
-    #     bigquery.SchemaField("column1", "STRING"),
-    #     bigquery.SchemaField("column2", "INTEGER"),
-    # ]
-
     for year in range(2017,2025):
         load_gcs_to_bigquery(
-            gcs_uri=f"gs://api_spotify_artists_tracks/changeDataType/{year}.csv",
-            dataset_id='stage_ChangeDataType',
-            table_id=f'{year}',
-            schema=None,
-            skip_rows=1
+            gcs_uri = f'gs://api_spotify_artists_tracks/changeDataType/{year}.csv',
+            dataset_id = 'stage_ChangeDataType',
+            table_id = f'{year}',
+            external_source_format='CSV',
+            schema = [
+                bigquery.SchemaField("chart_date", "DATE"),
+                bigquery.SchemaField("missingRequiredFields", "BOOLEAN"),
+                bigquery.SchemaField("update_time", "INTEGER"),
+                bigquery.SchemaField("currentRank", "INTEGER"),
+                bigquery.SchemaField("previousRank", "INTEGER"),
+                bigquery.SchemaField("peakRank", "INTEGER"),
+                bigquery.SchemaField("peakDate", "DATE"),
+                bigquery.SchemaField("appearancesOnChart", "INTEGER"),
+                bigquery.SchemaField("consecutiveAppearancesOnChart", "INTEGER"),
+                bigquery.SchemaField("entryStatus", "STRING"),
+                bigquery.SchemaField("entryRank", "INTEGER"),
+                bigquery.SchemaField("entryDate", "DATE"),
+                bigquery.SchemaField("rankingMetric_value", "INTEGER"),
+                bigquery.SchemaField("trackName", "STRING"),
+                bigquery.SchemaField("trackUri", "STRING"),
+                bigquery.SchemaField("releaseDate", "DATE"),
+                bigquery.SchemaField("artist_name", "STRING"),
+                bigquery.SchemaField("artistUri", "STRING"),
+                bigquery.SchemaField("labels", "STRING"),
+            ]
         )
 
 with DAG('get_chart_data_from_BQ.py',
