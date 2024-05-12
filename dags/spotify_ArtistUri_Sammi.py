@@ -7,10 +7,8 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token_gcp_Sammi4 import create_bigquery_client
 from google.cloud import bigquery
-from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi4 import get_latest_ac_token_gcp1, request_new_ac_token_refresh_token_gcp1
+from refresh_token.refresh_token_gcp_Sammi4 import get_latest_ac_token_gcp4, request_new_ac_token_refresh_token_gcp4
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
@@ -31,12 +29,12 @@ default_args = {
 
 def check_if_need_update_token(**context):
     current_timestamp = int(time.time())
-    ac_dict = get_latest_ac_token_gcp1()
+    ac_dict = get_latest_ac_token_gcp4()
     access_token = ac_dict["access_token"]
     last_ac_time = ac_dict["access_last_update"]
 
     if last_ac_time + 3000 < current_timestamp: # means token has been expired, default is 3600, make it 3000 to ensure we have enough time
-        access_token = request_new_ac_token_refresh_token_gcp1()
+        access_token = request_new_ac_token_refresh_token_gcp4()
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 

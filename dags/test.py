@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
@@ -9,16 +9,15 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token.refresh_token_gcp_Sammi import create_bigquery_client
+from refresh_token.refresh_token_gcp_Sammi6 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token.refresh_token_gcp_Sammi import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token.refresh_token_gcp_Sammi6 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
 from refresh_token.refresh_token_gcp_Sammi7 import get_latest_ac_token_gcp1, request_new_ac_token_refresh_token_gcp1
 from refresh_token.refresh_token_gcp_Sammi8 import get_latest_ac_token_gcp2, request_new_ac_token_refresh_token_gcp2
 from refresh_token.refresh_token_gcp_Sammi9 import get_latest_ac_token_gcp3, request_new_ac_token_refresh_token_gcp3
 from refresh_token.refresh_token_gcp_Sammi4 import get_latest_ac_token_gcp4, request_new_ac_token_refresh_token_gcp4
 from refresh_token.refresh_token_gcp_Sammi5 import get_latest_ac_token_gcp5, request_new_ac_token_refresh_token_gcp5
-
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
@@ -41,12 +40,12 @@ CREDENTIAL_PATH = "./dags/cloud/affable-hydra-422306-r3-e77d83c42f33.json"
 def get_storage_client(CREDENTIAL_PATH):
     # Load the service account credentials from the specified file
     credentials = service_account.Credentials.from_service_account_file(CREDENTIAL_PATH)
-    
+  
     # Create and return a Cloud Storage client using the credentials
     return storage.Client(credentials=credentials)
 
 # get TrackUri from BigQuery
-def get_track_uris():  
+def get_track_uris():
     path_credential = "./dags/cloud/affable-hydra-422306-r3-e77d83c42f33.json"  
     credentials = service_account.Credentials.from_service_account_file(
         path_credential
@@ -77,13 +76,13 @@ def get_progress_from_gcs():
     client = get_storage_client(CREDENTIAL_PATH)
 
     bucket = client.bucket("api_spotify_artists_tracks")
-    blob = bucket.blob("process/test_track_audio_features_progress17_21.json")
+    blob = bucket.blob("process/test_track_audio_analysis_progress17_21.json")
 
     if blob.exists():
         progress = json.loads(blob.download_as_text())
 
     if isinstance(progress, dict):
-        trackAudioFeatures_list = progress["trackAudioFeatures_list"]
+        trackAudioAnalysis_list = progress["trackAudioAnalysis_list"]
         last_track_uri = progress["last_track_uri"]
 
         # get track URI from BigQuery
@@ -95,13 +94,40 @@ def get_progress_from_gcs():
         track_uris = filter_track_uris(track_uris_bq, last_track_uri)
         logging.info(f"Still have {len(track_uris)} data!")
 
-        return trackAudioFeatures_list, track_uris, last_track_uri
+        return trackAudioAnalysis_list, track_uris, last_track_uri
 
     else:
-        trackAudioFeatures_list = progress
+        trackAudioAnalysis_list = progress
         last_track_uri = None
         track_uris = None
-        return trackAudioFeatures_list, track_uris, last_track_uri
+        return trackAudioAnalysis_list, track_uris, last_track_uri
+
+    
+
+# def group1(track_uris):
+#     track_uris1 = track_uris[0:1201]
+#     logging.info("group1")
+#     return track_uris1
+# def group2(track_uris):
+#     track_uris2 = track_uris[1201:2401]
+#     logging.info("group2")
+#     return track_uris2
+# def group3(track_uris):
+#     track_uris3 = track_uris[2401:3601]
+#     logging.info("group3")
+#     return track_uris3
+# def group4(track_uris):
+#     track_uris4 = track_uris[3601:4801]
+#     logging.info("group4")
+#     return track_uris4
+# def group5(track_uris):
+#     track_uris5 = track_uris[4801:6001]
+#     logging.info("group5")
+#     return track_uris5
+# def group6(track_uris):
+#     track_uris6 = track_uris[6001:]
+#     logging.info("group6")
+#     return track_uris6    
 
 def check_if_need_update_token(**context):
     current_timestamp = int(time.time())
@@ -114,7 +140,7 @@ def check_if_need_update_token(**context):
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 
-#only for retry1
+#only for data1
 def check_if_need_update_token1(**context):
     current_timestamp = int(time.time())
     ac_dict = get_latest_ac_token_gcp1()
@@ -126,7 +152,7 @@ def check_if_need_update_token1(**context):
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 
-#only for retry2
+#only for data2
 def check_if_need_update_token2(**context):
     current_timestamp = int(time.time())
     ac_dict = get_latest_ac_token_gcp2()
@@ -138,7 +164,7 @@ def check_if_need_update_token2(**context):
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 
-#only for retry3
+#only for data3
 def check_if_need_update_token3(**context):
     current_timestamp = int(time.time())
     ac_dict = get_latest_ac_token_gcp3()
@@ -150,7 +176,7 @@ def check_if_need_update_token3(**context):
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 
-#only for retry4
+#only for data4
 def check_if_need_update_token4(**context):
     current_timestamp = int(time.time())
     ac_dict = get_latest_ac_token_gcp4()
@@ -162,7 +188,7 @@ def check_if_need_update_token4(**context):
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 
-#only for retry5
+#only for data5
 def check_if_need_update_token5(**context):
     current_timestamp = int(time.time())
     ac_dict = get_latest_ac_token_gcp5()
@@ -174,37 +200,24 @@ def check_if_need_update_token5(**context):
 
     context['ti'].xcom_push(key='access_token', value=access_token)
 
-    current_timestamp = int(time.time())
-    ac_dict = get_latest_ac_token_gcp5()
-    access_token = ac_dict["access_token"]
-    last_ac_time = ac_dict["access_last_update"]
-
-    if last_ac_time + 3000 < current_timestamp: # means token has been expired, default is 3600, make it 3000 to ensure we have enough time
-        access_token = request_new_ac_token_refresh_token_gcp5()
-
-    context['ti'].xcom_push(key='access_token', value=access_token)
-
-# store progress data in gcs
+# store progress data in gcs 
 def save_progress_to_gcs(client, progress):
+    
     bucket = client.bucket("api_spotify_artists_tracks")
-    blob = bucket.blob(f"process/test_track_audio_features_progress17_21.json")
+    blob = bucket.blob("process/test_track_audio_analysis_progress17_21.json")
     blob.upload_from_string(json.dumps(progress), content_type='application/json')
 
-# First try - Get Track's Audio features API always failed
-def get_track_audio_features_data(**context):
-    # df = get_track_uris()  # from BigQuery
-    # track_uris = list(set(df['trackUri'])) #distinct TrackUri
-
-    # # get Spotify token
-    # access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token', key='access_token')
-
-    # trackAudioFeatures_list = []
-
+## Read progress from gcs track_uris1
+def get_track_audio_analysis_data1(**context):
     #change sp token
     access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token1', key='access_token')
     
-    trackAudioFeatures_list, track_uris, last_track_uri = get_progress_from_gcs()
+    trackAudioAnalysis_list, track_uris, last_track_uri = get_progress_from_gcs()
+    # df = get_track_uris()
+    # track_uris= list(set(df['trackUri']))
+    # track_uris1 = group1(track_uris)
 
+    #trackAudioAnalysis_list = []
     r_count = 0
     for track_uri in track_uris:
         headers = {
@@ -227,7 +240,7 @@ def get_track_audio_features_data(**context):
     }
 
         logging.info(f"Using access_token:{access_token}")
-        get_track_url = f"https://api.spotify.com/v1/audio-features/{track_uri}"
+        get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
         response = requests.get(get_track_url, headers=headers,verify=False)
 
@@ -239,7 +252,7 @@ def get_track_audio_features_data(**context):
 
             progress = {
                 "last_track_uri": track_uri,
-                "trackAudioFeatures_list": trackAudioFeatures_list
+                "trackAudioAnalysis_list": trackAudioAnalysis_list
                 }
 
             save_progress_to_gcs(client, progress)  # save progress to GCS
@@ -248,104 +261,6 @@ def get_track_audio_features_data(**context):
             
         if response.status_code != 200 and response.status_code != 429:# token expired
             logging.info(f"Request a new token for retry")
-            access_token = request_new_ac_token_refresh_token_gcp()
-            response = requests.get(
-                get_track_url,
-                headers = {
-            "authority": "api.spotify.com",
-            "Accept": "application/json",
-            "accept-language": "zh-TW,zh;q=0.9",
-            "app-platform": "Browser",
-            "Authorization": f"Bearer {access_token}",
-            "content-type": "application/json",
-            "Origin": "https://developer.spotify.com",
-            "Referer": "https://developer.spotify.com/",
-            "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
-            "Sec-Ch-Ua-Mobile": "?0",
-            "Sec-Ch-Ua-Platform": "\"Windows\"",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-            "Connection": "close"
-        },
-        verify=False
-            )
-        
-        track_data = response.json()
-        trackAudioFeatures_list.append(track_data)
-
-        n = random.randint(1,3) ## gen 1~15s
-        time.sleep(n)
-
-        r_count += 1
-        if r_count == 150:
-            client = get_storage_client(CREDENTIAL_PATH)
-
-            progress = {
-                "last_track_uri": track_uri,
-                "trackAudioFeatures_list": trackAudioFeatures_list
-                }
-
-            save_progress_to_gcs(client, progress)  # save progress to GCS
-            time.sleep(70)
-            logging.info(f'{r_count} save to gcs - time sleep 70s now!')
-            r_count = 0
-        
-    logging.info(f"If you see this, means you get the whole {len(trackAudioFeatures_list)} data from get_track_audio_features API!")
-    client = get_storage_client(CREDENTIAL_PATH)
-    save_progress_to_gcs(client, trackAudioFeatures_list)  # save final to GCS
-
-## Read progress from gcs 1
-def get_track_audio_features_data1(**context):
-    #change sp token
-    access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token1', key='access_token')
-    
-    trackAudioFeatures_list, track_uris, last_track_uri = get_progress_from_gcs()
-
-    r_count = 0
-    for track_uri in track_uris:
-        headers = {
-        "authority": "api.spotify.com",
-        "Accept": "application/json",
-        "accept-language": "zh-TW,zh;q=0.9",
-        "app-platform": "Browser",
-        "Authorization": f"Bearer {access_token}",
-        "content-type": "application/json",
-        "Origin": "https://developer.spotify.com",
-        "Referer": "https://developer.spotify.com/",
-        "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
-        "Sec-Ch-Ua-Mobile": "?0",
-        "Sec-Ch-Ua-Platform": "\"Windows\"",
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-site",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-        "Connection": "close"
-    }
-
-        logging.info(f"Using access_token:{access_token}")
-        get_track_url = f"https://api.spotify.com/v1/audio-features/{track_uri}"
-
-        response = requests.get(get_track_url, headers=headers,verify=False)
-
-        while response.status_code == 429:
-            logging.info(f"Reach the request limitation, saving the progress now!")
-            time.sleep(10)
-
-            client = get_storage_client(CREDENTIAL_PATH)
-
-            progress = {
-                "last_track_uri": track_uri,
-                "trackAudioFeatures_list": trackAudioFeatures_list
-                }
-
-            save_progress_to_gcs(client, progress)  # save progress to GCS
-            logging.error("Progress saved, exiting now!")
-            raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
-                
-        if response.status_code != 200 and response.status_code != 429:# token expired
-            logging.info(f"Request a new token for retry, save the progress first")
             access_token = request_new_ac_token_refresh_token_gcp1()
             response = requests.get(
                 get_track_url,
@@ -369,12 +284,12 @@ def get_track_audio_features_data1(**context):
         },
         verify=False
             )
-            
-        track_data = response.json()
-        trackAudioFeatures_list.append(track_data)
+        
+        track_data = response.json()['track']
+        trackAudioAnalysis_list.append(track_data)
 
-        # n = random.randint(1,3) ## gen 1~5s
-        # time.sleep(n)
+        n = random.randint(1,5) ## gen 1~5s
+        time.sleep(n)
 
         r_count += 1
         if r_count == 150:
@@ -382,7 +297,7 @@ def get_track_audio_features_data1(**context):
 
             progress = {
                 "last_track_uri": track_uri,
-                "trackAudioFeatures_list": trackAudioFeatures_list
+                "trackAudioAnalysis_list": trackAudioAnalysis_list
                 }
 
             save_progress_to_gcs(client, progress)  # save progress to GCS
@@ -390,21 +305,28 @@ def get_track_audio_features_data1(**context):
             logging.info(f'{r_count} save to gcs - time sleep 70s now!')
             r_count = 0 
 
-    logging.info(f"If you see this, means you get the whole {len(trackAudioFeatures_list)} data from get_track_audio_features API!")
+    logging.info(f"If you see this, means you get {len(trackAudioAnalysis_list)} data from group1!")
     client = get_storage_client(CREDENTIAL_PATH)
-    save_progress_to_gcs(client, trackAudioFeatures_list)  # save final to GCS
+    # progress = {
+    #             "last_track_uri": track_uris1[-1],
+    #             "trackAudioAnalysis_list": trackAudioAnalysis_list
+    #             }
 
-## Read progress from gcs 2
-def get_track_audio_features_data2(**context):
+    save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
+
+## Read progress from gcs1
+def get_track_audio_analysis_data2(**context):
     
-    trackAudioFeatures_list, track_uris, last_track_uri = get_progress_from_gcs()
+    trackAudioAnalysis_list, track_uris, last_track_uri = get_progress_from_gcs()
+    # track_uris2 = group2(track_uris)
 
     if last_track_uri is None:
         logging.info("It is the whole data!")
+
     else:
         #change sp token
         access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token2', key='access_token')
-    
+
         r_count = 0
         for track_uri in track_uris:
             headers = {
@@ -427,7 +349,7 @@ def get_track_audio_features_data2(**context):
         }
 
             logging.info(f"Using access_token:{access_token}")
-            get_track_url = f"https://api.spotify.com/v1/audio-features/{track_uri}"
+            get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
             response = requests.get(get_track_url, headers=headers,verify=False)
 
@@ -439,15 +361,15 @@ def get_track_audio_features_data2(**context):
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
-                    }
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
 
-                save_progress_to_gcs(client, progress)  # save progress to GCS
+                save_progress_to_gcs(client, progress)
                 logging.error("Progress saved, exiting now!")
                 raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
-                    
+                
             if response.status_code != 200 and response.status_code != 429:# token expired
-                logging.info(f"Request a new token for retry, save the progress first")
+                logging.info(f"Request a new token for retry")
                 access_token = request_new_ac_token_refresh_token_gcp1()
                 response = requests.get(
                     get_track_url,
@@ -471,11 +393,11 @@ def get_track_audio_features_data2(**context):
             },
             verify=False
                 )
-                
-            track_data = response.json()
-            trackAudioFeatures_list.append(track_data)
+            
+            track_data = response.json()['track']
+            trackAudioAnalysis_list.append(track_data)
 
-            n = random.randint(1,3) ## gen 1~5s
+            n = random.randint(1,5) ## gen 1~5s
             time.sleep(n)
 
             r_count += 1
@@ -484,29 +406,34 @@ def get_track_audio_features_data2(**context):
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
-                    }
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
 
                 save_progress_to_gcs(client, progress)  # save progress to GCS
                 time.sleep(70)
                 logging.info(f'{r_count} save to gcs - time sleep 70s now!')
                 r_count = 0 
 
-        logging.info(f"If you see this, means you get the whole {len(trackAudioFeatures_list)} data from get_track_audio_features API!")
-        client = get_storage_client(CREDENTIAL_PATH)
-        save_progress_to_gcs(client, trackAudioFeatures_list)  # save final to GCS
+        logging.info(f"If you see this, means you get group2 {len(trackAudioAnalysis_list)} data!")
+        # progress = {
+        #         "last_track_uri": track_uris2[-1],
+        #         "trackAudioAnalysis_list": trackAudioAnalysis_list
+        #         }
 
-## Read progress from gcs 3
-def get_track_audio_features_data3(**context):
+        save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
 
-    trackAudioFeatures_list, track_uris, last_track_uri = get_progress_from_gcs()
+## Read progress from gcs2
+def get_track_audio_analysis_data3(**context):
+    
+    trackAudioAnalysis_list, track_uris, last_track_uri = get_progress_from_gcs()
+    # track_uris3 = group3(track_uris)
 
     if last_track_uri is None:
         logging.info("It is the whole data!")
     else:
         #change sp token
         access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token3', key='access_token')
-    
+
         r_count = 0
         for track_uri in track_uris:
             headers = {
@@ -529,27 +456,27 @@ def get_track_audio_features_data3(**context):
         }
 
             logging.info(f"Using access_token:{access_token}")
-            get_track_url = f"https://api.spotify.com/v1/audio-features/{track_uri}"
+            get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
             response = requests.get(get_track_url, headers=headers,verify=False)
 
             while response.status_code == 429:
                 logging.info(f"Reach the request limitation, saving the progress now!")
-                time.sleep(10)
+                time.sleep(30)
 
                 client = get_storage_client(CREDENTIAL_PATH)
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
                     }
 
                 save_progress_to_gcs(client, progress)  # save progress to GCS
                 logging.error("Progress saved, exiting now!")
                 raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
-                    
+                
             if response.status_code != 200 and response.status_code != 429:# token expired
-                logging.info(f"Request a new token for retry, save the progress first")
+                logging.info(f"Request a new token for retry")
                 access_token = request_new_ac_token_refresh_token_gcp1()
                 response = requests.get(
                     get_track_url,
@@ -573,11 +500,11 @@ def get_track_audio_features_data3(**context):
             },
             verify=False
                 )
-                
-            track_data = response.json()
-            trackAudioFeatures_list.append(track_data)
+            
+            track_data = response.json()['track']
+            trackAudioAnalysis_list.append(track_data)
 
-            n = random.randint(1,3) ## gen 1~5s
+            n = random.randint(1,5) ## gen 1~5s
             time.sleep(n)
 
             r_count += 1
@@ -586,29 +513,34 @@ def get_track_audio_features_data3(**context):
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
-                    }
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
 
                 save_progress_to_gcs(client, progress)  # save progress to GCS
                 time.sleep(70)
                 logging.info(f'{r_count} save to gcs - time sleep 70s now!')
                 r_count = 0 
 
-        logging.info(f"If you see this, means you get the whole {len(trackAudioFeatures_list)} data from get_track_audio_features API!")
-        client = get_storage_client(CREDENTIAL_PATH)
-        save_progress_to_gcs(client, trackAudioFeatures_list)  # save final to GCS
+        logging.info(f"If you see this, means you get group3 {len(trackAudioAnalysis_list)} data")
+        # progress = {
+        #         "last_track_uri": track_uris3[-1],
+        #         "trackAudioAnalysis_list": trackAudioAnalysis_list
+        #         }
 
-## Read progress from gcs 4
-def get_track_audio_features_data4(**context):
+        save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
 
-    trackAudioFeatures_list, track_uris, last_track_uri = get_progress_from_gcs()
+## Read progress from gcs3
+def get_track_audio_analysis_data4(**context):
+    
+    trackAudioAnalysis_list, track_uris, last_track_uri = get_progress_from_gcs()
+    # track_uris4 = group4(track_uris)
 
     if last_track_uri is None:
         logging.info("It is the whole data!")
     else:
         #change sp token
         access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token4', key='access_token')
-    
+
         r_count = 0
         for track_uri in track_uris:
             headers = {
@@ -631,27 +563,27 @@ def get_track_audio_features_data4(**context):
         }
 
             logging.info(f"Using access_token:{access_token}")
-            get_track_url = f"https://api.spotify.com/v1/audio-features/{track_uri}"
+            get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
             response = requests.get(get_track_url, headers=headers,verify=False)
 
             while response.status_code == 429:
                 logging.info(f"Reach the request limitation, saving the progress now!")
-                time.sleep(10)
+                time.sleep(30)
 
                 client = get_storage_client(CREDENTIAL_PATH)
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
                     }
 
                 save_progress_to_gcs(client, progress)  # save progress to GCS
                 logging.error("Progress saved, exiting now!")
                 raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
-                    
+                
             if response.status_code != 200 and response.status_code != 429:# token expired
-                logging.info(f"Request a new token for retry, save the progress first")
+                logging.info(f"Request a new token for retry")
                 access_token = request_new_ac_token_refresh_token_gcp1()
                 response = requests.get(
                     get_track_url,
@@ -675,9 +607,9 @@ def get_track_audio_features_data4(**context):
             },
             verify=False
                 )
-                
-            track_data = response.json()
-            trackAudioFeatures_list.append(track_data)
+            
+            track_data = response.json()['track']
+            trackAudioAnalysis_list.append(track_data)
 
             n = random.randint(1,5) ## gen 1~5s
             time.sleep(n)
@@ -688,29 +620,138 @@ def get_track_audio_features_data4(**context):
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
-                    }
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
 
                 save_progress_to_gcs(client, progress)  # save progress to GCS
                 time.sleep(70)
                 logging.info(f'{r_count} save to gcs - time sleep 70s now!')
                 r_count = 0 
 
-        logging.info(f"If you see this, means you get the whole {len(trackAudioFeatures_list)} data from get_track_audio_features API!")
-        client = get_storage_client(CREDENTIAL_PATH)
-        save_progress_to_gcs(client, trackAudioFeatures_list)  # save final to GCS
+        logging.info(f"If you see this, means you get group4 {len(trackAudioAnalysis_list)} data!")
+        # progress = {
+        #         "last_track_uri": track_uris4[-1],
+        #         "trackAudioAnalysis_list": trackAudioAnalysis_list
+        # }
+        save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
 
-## Read progress from gcs 5
-def get_track_audio_features_data5(**context):
+## Read progress from gcs4
+def get_track_audio_analysis_data5(**context):
+    
+    trackAudioAnalysis_list, track_uris, last_track_uri = get_progress_from_gcs()
+    # track_uris5 = group5(track_uris)
 
-    trackAudioFeatures_list, track_uris, last_track_uri = get_progress_from_gcs()
+    if last_track_uri == None:
+        logging.info("It is the whole data!")
+    else:
+        #change sp token
+        access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token5', key='access_token')
+
+        r_count = 0
+        for track_uri in track_uris:
+            headers = {
+            "authority": "api.spotify.com",
+            "Accept": "application/json",
+            "accept-language": "zh-TW,zh;q=0.9",
+            "app-platform": "Browser",
+            "Authorization": f"Bearer {access_token}",
+            "content-type": "application/json",
+            "Origin": "https://developer.spotify.com",
+            "Referer": "https://developer.spotify.com/",
+            "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+            "Sec-Ch-Ua-Mobile": "?0",
+            "Sec-Ch-Ua-Platform": "\"Windows\"",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-site",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Connection": "close"
+        }
+
+            logging.info(f"Using access_token:{access_token}")
+            get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
+
+            response = requests.get(get_track_url, headers=headers,verify=False)
+
+            while response.status_code == 429:
+                logging.info(f"Reach the request limitation, saving the progress now!")
+                time.sleep(30)
+
+                client = get_storage_client(CREDENTIAL_PATH)
+
+                progress = {
+                    "last_track_uri": track_uri,
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                    }
+
+                save_progress_to_gcs(client, progress)  # save progress to GCS
+                logging.error("Progress saved, exiting now!")
+                raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
+                
+            if response.status_code != 200 and response.status_code != 429:# token expired
+                logging.info(f"Request a new token for retry")
+                access_token = request_new_ac_token_refresh_token_gcp1()
+                response = requests.get(
+                    get_track_url,
+                    headers = {
+                "authority": "api.spotify.com",
+                "Accept": "application/json",
+                "accept-language": "zh-TW,zh;q=0.9",
+                "app-platform": "Browser",
+                "Authorization": f"Bearer {access_token}",
+                "content-type": "application/json",
+                "Origin": "https://developer.spotify.com",
+                "Referer": "https://developer.spotify.com/",
+                "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+                "Sec-Ch-Ua-Mobile": "?0",
+                "Sec-Ch-Ua-Platform": "\"Windows\"",
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "cors",
+                "Sec-Fetch-Site": "same-site",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                "Connection": "close"
+            },
+            verify=False
+                )
+            
+            track_data = response.json()['track']
+            trackAudioAnalysis_list.append(track_data)
+
+            # n = random.randint(1,5) ## gen 1~5s
+            # time.sleep(n)
+
+            r_count += 1
+            if r_count == 150:
+                client = get_storage_client(CREDENTIAL_PATH)
+
+                progress = {
+                    "last_track_uri": track_uri,
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
+
+                save_progress_to_gcs(client, progress)  # save progress to GCS
+                time.sleep(70)
+                logging.info(f'{r_count} save to gcs - time sleep 70s now!')
+                r_count = 0 
+
+        logging.info(f"If you see this, means you get group5 {len(trackAudioAnalysis_list)} data")
+        # progress = {
+        #         "last_track_uri": track_uris5[-1],
+        #         "trackAudioAnalysis_list": trackAudioAnalysis_list
+        # }
+        save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
+
+def get_track_audio_analysis_data6(**context):
+    
+    trackAudioAnalysis_list, track_uris, last_track_uri = get_progress_from_gcs()
+    # track_uris6 = group6(track_uris)
 
     if last_track_uri is None:
         logging.info("It is the whole data!")
     else:
         #change sp token
-        access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token5', key='access_token')
-    
+        access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token', key='access_token')
+
         r_count = 0
         for track_uri in track_uris:
             headers = {
@@ -733,27 +774,27 @@ def get_track_audio_features_data5(**context):
         }
 
             logging.info(f"Using access_token:{access_token}")
-            get_track_url = f"https://api.spotify.com/v1/audio-features/{track_uri}"
+            get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
             response = requests.get(get_track_url, headers=headers,verify=False)
 
             while response.status_code == 429:
                 logging.info(f"Reach the request limitation, saving the progress now!")
-                time.sleep(10)
+                time.sleep(30)
 
                 client = get_storage_client(CREDENTIAL_PATH)
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
                     }
 
                 save_progress_to_gcs(client, progress)  # save progress to GCS
                 logging.error("Progress saved, exiting now!")
                 raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
-                    
+                
             if response.status_code != 200 and response.status_code != 429:# token expired
-                logging.info(f"Request a new token for retry, save the progress first")
+                logging.info(f"Request a new token for retry")
                 access_token = request_new_ac_token_refresh_token_gcp1()
                 response = requests.get(
                     get_track_url,
@@ -777,12 +818,12 @@ def get_track_audio_features_data5(**context):
             },
             verify=False
                 )
-                
-            track_data = response.json()
-            trackAudioFeatures_list.append(track_data)
+            
+            track_data = response.json()['track']
+            trackAudioAnalysis_list.append(track_data)
 
-            n = random.randint(1,5) ## gen 1~5s
-            time.sleep(n)
+            # n = random.randint(1,5) ## gen 1~5s
+            # time.sleep(n)
 
             r_count += 1
             if r_count == 150:
@@ -790,36 +831,48 @@ def get_track_audio_features_data5(**context):
 
                 progress = {
                     "last_track_uri": track_uri,
-                    "trackAudioFeatures_list": trackAudioFeatures_list
-                    }
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
 
                 save_progress_to_gcs(client, progress)  # save progress to GCS
                 time.sleep(70)
                 logging.info(f'{r_count} save to gcs - time sleep 70s now!')
                 r_count = 0 
 
-        logging.info(f"If you see this, means you get the whole {len(trackAudioFeatures_list)} data from get_track_audio_features API!")
-        client = get_storage_client(CREDENTIAL_PATH)
-        save_progress_to_gcs(client, trackAudioFeatures_list)  # save final to GCS
+        logging.info(f"If you see this, means you get group6 {len(trackAudioAnalysis_list)} data")
+        # progress = {
+        #         "last_track_uri": track_uris6[-1],
+        #         "trackAudioAnalysis_list": trackAudioAnalysis_list
+        # }
+        save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
 
 
-def process_data_from_gcs():
+
+def process_data_in_gcs():
     
     client = get_storage_client(CREDENTIAL_PATH)
     bucket = client.bucket("api_spotify_artists_tracks")
-    blob = bucket.blob("process/test_track_audio_features_progress17_21.json")
+    blob = bucket.blob("process/test_track_audio_analysis_progress17_21.json")
 
-    trackAudioFeatures_list = json.loads(blob.download_as_text())
+    trackAudioAnalysis_list = json.loads(blob.download_as_text())
+    # trackAudioAnalysis_list = final_from_gcs["trackAudioAnalysis_list"]
     
-    #Extend data
-    df_trackAudioFeatures = pd.json_normalize(trackAudioFeatures_list)
+    #getTrackUri
+    df = get_track_uris()  # from BigQuery
+    track_uris = list(set(df['trackUri'])) #distinct TrackUri
 
+    #Extend data
+    df_trackUri = pd.DataFrame(track_uris,columns=['trackUri'])
+    df_trackAudioAnalysis = pd.DataFrame(trackAudioAnalysis_list)
+    df_concat = pd.concat([df_trackUri,df_trackAudioAnalysis], axis=1)
+    # df_trackOfAudioAnalysis = pd.concat([pd.DataFrame(df_concat['trackUri']),pd.DataFrame(pd.json_normalize(df_concat['track']))],axis=1)
+    
     #Upload to GCS
-    local_file_path = 'test_AudioFeatures.csv'
+    local_file_path = 'test_trackOfAudioAnalysis17_21.csv'
     gcs_bucket = 'api_spotify_artists_tracks'
     gcs_file_name = f'output/{local_file_path}'
 
-    df_trackAudioFeatures.to_csv(local_file_path, index=False)
+    df_concat.to_csv(local_file_path, index=False)
 
     bucket = client.get_bucket(gcs_bucket)
     blob = bucket.blob(gcs_file_name)
@@ -827,11 +880,10 @@ def process_data_from_gcs():
     blob.upload_from_filename(local_file_path)
 
 
-
-with DAG('spotify_GetTrackAudioFeatures_Sammi_copy.py',
-         default_args=default_args,
-         schedule_interval="@monthly",
-         catchup=False) as dag:
+with DAG('test.py',
+        default_args=default_args,
+        schedule="@monthly",  
+        catchup=False) as dag:
     check_if_need_update_token = PythonOperator(
         task_id='check_if_need_update_token',
         python_callable=check_if_need_update_token
@@ -863,60 +915,61 @@ with DAG('spotify_GetTrackAudioFeatures_Sammi_copy.py',
         provide_context=True,
     )
 
-    get_track_audio_features_data = PythonOperator(
-        task_id='get_track_audio_features_data',
-        python_callable=get_track_audio_features_data,
+    get_track_audio_analysis_data1 = PythonOperator(
+        task_id='get_track_audio_analysis_data1',
+        python_callable=get_track_audio_analysis_data1,
         provide_context=True,
     )
 
-    get_track_audio_features_data1 = PythonOperator(
-        task_id='get_track_audio_features_data1',
-        python_callable=get_track_audio_features_data1,
+    get_track_audio_analysis_data2 = PythonOperator(
+        task_id='get_track_audio_analysis_data2',
+        python_callable=get_track_audio_analysis_data2,
         provide_context=True,
     )
 
-    get_track_audio_features_data2 = PythonOperator(
-        task_id='get_track_audio_features_data2',
-        python_callable=get_track_audio_features_data2,
+    get_track_audio_analysis_data3 = PythonOperator(
+        task_id='get_track_audio_analysis_data3',
+        python_callable=get_track_audio_analysis_data3,
         provide_context=True,
     )
 
-    get_track_audio_features_data3 = PythonOperator(
-        task_id='get_track_audio_features_data3',
-        python_callable=get_track_audio_features_data3,
+    get_track_audio_analysis_data4 = PythonOperator(
+        task_id='get_track_audio_analysis_data4',
+        python_callable=get_track_audio_analysis_data4,
         provide_context=True,
     )
 
-    get_track_audio_features_data4 = PythonOperator(
-        task_id='get_track_audio_features_data4',
-        python_callable=get_track_audio_features_data4,
+    get_track_audio_analysis_data5 = PythonOperator(
+        task_id='get_track_audio_analysis_data5',
+        python_callable=get_track_audio_analysis_data5,
+        provide_context=True,
+    )
+    get_track_audio_analysis_data6 = PythonOperator(
+        task_id='get_track_audio_analysis_data6',
+        python_callable=get_track_audio_analysis_data6,
         provide_context=True,
     )
 
-    get_track_audio_features_data5 = PythonOperator(
-        task_id='get_track_audio_features_data5',
-        python_callable=get_track_audio_features_data5,
-        provide_context=True,
-    )
-
-    process_data_from_gcs = PythonOperator(
+    process_data_in_gcs = PythonOperator(
         task_id='process_data_in_gcs',
-        python_callable=process_data_from_gcs,
+        python_callable=process_data_in_gcs,
         provide_context=True,
     )
+
 
 # Order of DAGs
-check_if_need_update_token >> get_track_audio_features_data >> check_if_need_update_token1 >> get_track_audio_features_data1 >> check_if_need_update_token2 >> get_track_audio_features_data2 >> check_if_need_update_token3 >> get_track_audio_features_data3 >> check_if_need_update_token4 >> get_track_audio_features_data4 >> check_if_need_update_token5 >> get_track_audio_features_data5 >> process_data_from_gcs
+check_if_need_update_token1 >> get_track_audio_analysis_data1 >> check_if_need_update_token2 >> get_track_audio_analysis_data2 >> check_if_need_update_token3 >> get_track_audio_analysis_data3 >> check_if_need_update_token4 >> get_track_audio_analysis_data4 >> check_if_need_update_token5 >> get_track_audio_analysis_data5 >> check_if_need_update_token >> get_track_audio_analysis_data6 
 
-check_if_need_update_token1.trigger_rule = TriggerRule.ALL_DONE
 check_if_need_update_token2.trigger_rule = TriggerRule.ALL_DONE
 check_if_need_update_token3.trigger_rule = TriggerRule.ALL_DONE
 check_if_need_update_token4.trigger_rule = TriggerRule.ALL_DONE
 check_if_need_update_token5.trigger_rule = TriggerRule.ALL_DONE
+check_if_need_update_token.trigger_rule = TriggerRule.ALL_DONE
 
-#data1&data2兩個上游任務執行完成才會執行process_data_from_gcs
-process_data_from_gcs.set_upstream(
-    [get_track_audio_features_data1, get_track_audio_features_data2, get_track_audio_features_data3,
-    get_track_audio_features_data4, get_track_audio_features_data5]
+
+#all task 執行完成才會執行store_data_in_gcs
+process_data_in_gcs.set_upstream(
+    [get_track_audio_analysis_data1, get_track_audio_analysis_data2, get_track_audio_analysis_data3,
+     get_track_audio_analysis_data4, get_track_audio_analysis_data5, get_track_audio_analysis_data6]
 )
-process_data_from_gcs.trigger_rule = TriggerRule.ALL_DONE
+process_data_in_gcs.trigger_rule = TriggerRule.ALL_DONE

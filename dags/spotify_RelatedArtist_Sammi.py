@@ -7,10 +7,10 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token_gcp_Sammi2 import create_bigquery_client
+from refresh_token.refresh_token_gcp_Sammi2 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi2 import get_latest_ac_token_gcp1, request_new_ac_token_refresh_token_gcp1
+from refresh_token.refresh_token_gcp_Sammi2 import get_latest_ac_token_gcp1, request_new_ac_token_refresh_token_gcp1
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage

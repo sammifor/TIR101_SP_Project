@@ -9,13 +9,13 @@ import requests
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import time
-from refresh_token_gcp_Sammi6 import create_bigquery_client
+from refresh_token.refresh_token_gcp_Sammi6 import create_bigquery_client
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
-from refresh_token_gcp_Sammi6 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
-from refresh_token_gcp_Sammi7 import get_latest_ac_token_gcp1, request_new_ac_token_refresh_token_gcp1
-from refresh_token_gcp_Sammi8 import get_latest_ac_token_gcp2, request_new_ac_token_refresh_token_gcp2
-from refresh_token_gcp_Sammi9 import get_latest_ac_token_gcp3, request_new_ac_token_refresh_token_gcp3
+from refresh_token.refresh_token_gcp_Sammi6 import get_latest_ac_token_gcp, request_new_ac_token_refresh_token_gcp
+from refresh_token.refresh_token_gcp_Sammi7 import get_latest_ac_token_gcp1, request_new_ac_token_refresh_token_gcp1
+from refresh_token.refresh_token_gcp_Sammi8 import get_latest_ac_token_gcp2, request_new_ac_token_refresh_token_gcp2
+from refresh_token.refresh_token_gcp_Sammi9 import get_latest_ac_token_gcp3, request_new_ac_token_refresh_token_gcp3
 from google.oauth2 import service_account
 import pandas as pd
 from google.cloud import storage
@@ -100,7 +100,7 @@ def get_track_uris():
     # 查询 trackUri
     query = """
     SELECT DISTINCT trackUri
-    FROM `affable-hydra-422306-r3.ChangeDataType.expand_orderbydate_table`
+    FROM `affable-hydra-422306-r3.ChangeDataType.expand_orderbydate_table17_21`
     """
     df = client.query(query).to_dataframe() 
 
@@ -130,12 +130,29 @@ def save_progress_to_gcs(client, progress):
 # First try - Get Track's Audio Analysis API always failed
 def get_track_audio_analysis_data(**context):
     df = get_track_uris()  # from BigQuery
-    track_uris = list(set(df['trackUri'])) #distinct TrackUri
+    track_uris_bq = list(set(df['trackUri'])) #distinct TrackUri
+    logging.info(f"There are {len(track_uris_bq)} in original file!")
+
+    #read form gcs
+    # try reload progress from GCS
+    client = get_storage_client(CREDENTIAL_PATH)
+
+    bucket = client.bucket("api_spotify_artists_tracks")
+    blob = bucket.blob("process/track_audio_analysis_progress.json")
+
+    if blob.exists():
+        progress = json.loads(blob.download_as_text())
+
+    trackAudioAnalysis_list = progress["trackAudioAnalysis_list"]
+    last_track_uri = progress["last_track_uri"]
+
+    # filter track_uris list
+    track_uris = filter_track_uris(track_uris_bq, last_track_uri)
+    logging.info(f"Still have {len(track_uris)} data!")
     
-     # get Spotify token
+    # get Spotify token
     access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token', key='access_token')
     
-    trackAudioAnalysis_list = []
     r_count = 0
     for track_uri in track_uris:
         headers = {
@@ -166,12 +183,9 @@ def get_track_audio_analysis_data(**context):
             client = get_storage_client(CREDENTIAL_PATH)
 
             progress = {
-                "last_track_uri": None,
-                "trackAudioAnalysis_list": []
+                "last_track_uri": track_uri,
+                "trackAudioAnalysis_list": trackAudioAnalysis_list
                 }
-            
-            progress["last_track_uri"] = track_uri
-            progress["trackAudioAnalysis_list"] = trackAudioAnalysis_list
 
             save_progress_to_gcs(client, progress)  # save progress to GCS
             logging.error("Progress saved, exiting now!")
@@ -206,8 +220,17 @@ def get_track_audio_analysis_data(**context):
 
         logging.info(f'{r_count} - get trackAudioAnalysis_list success!')
 
-        n = random.randint(1,5) ## gen 1~5s
-        time.sleep(n)
+        progress = {
+                "last_track_uri": track_uri,
+                "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
+        
+        client = get_storage_client(CREDENTIAL_PATH)
+        save_progress_to_gcs(client, progress)  # save progress to GCS
+        logging.info("save to gcs")
+
+        # n = random.randint(1,5) ## gen 1~5s
+        # time.sleep(n)
 
         r_count += 1
         if r_count == 150:
@@ -216,7 +239,8 @@ def get_track_audio_analysis_data(**context):
             r_count = 0
     
     logging.info("If you see this, means you get the whole data from get_track API!")
-    save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS  
+    client = get_storage_client(CREDENTIAL_PATH)
+    save_progress_to_gcs(client, trackAudioAnalysis_list)
 
 ## Read progress from gcs
 def get_track_audio_analysis_data1(**context):
@@ -225,10 +249,7 @@ def get_track_audio_analysis_data1(**context):
     
     # try reload progress from GCS
     client = get_storage_client(CREDENTIAL_PATH)
-    progress = {
-        "last_track_uri": None,
-        "trackAudioAnalysis_list": []
-    }
+
     bucket = client.bucket("api_spotify_artists_tracks")
     blob = bucket.blob("process/track_audio_analysis_progress.json")
 
@@ -244,6 +265,7 @@ def get_track_audio_analysis_data1(**context):
 
     # filter track_uris list
     track_uris = filter_track_uris(track_uris_bq, last_track_uri)
+    logging.info(f"Still have {len(track_uris)} data!")
 
     r_count = 0
     for track_uri in track_uris:
@@ -278,12 +300,9 @@ def get_track_audio_analysis_data1(**context):
             client = get_storage_client(CREDENTIAL_PATH)
 
             progress = {
-                "last_track_uri": None,
-                "trackAudioAnalysis_list": []
+                "last_track_uri": track_uri,
+                "trackAudioAnalysis_list": trackAudioAnalysis_list
                 }
-
-            progress["last_track_uri"] = track_uri
-            progress["trackAudioAnalysis_list"] = trackAudioAnalysis_list
 
             save_progress_to_gcs(client, progress)  # save progress to GCS
             logging.error("Progress saved, exiting now!")
@@ -318,8 +337,17 @@ def get_track_audio_analysis_data1(**context):
         track_data = response.json()
         trackAudioAnalysis_list.append(track_data)
 
-        n = random.randint(1,5) ## gen 1~5s
-        time.sleep(n)
+        progress = {
+                "last_track_uri": track_uri,
+                "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
+        
+        client = get_storage_client(CREDENTIAL_PATH)
+        save_progress_to_gcs(client, progress)  # save progress to GCS
+        logging.info("save to gcs")
+
+        # n = random.randint(1,5) ## gen 1~5s
+        # time.sleep(n)
 
         r_count += 1
         if r_count == 150:
@@ -328,89 +356,45 @@ def get_track_audio_analysis_data1(**context):
             r_count = 0 
 
     logging.info("If you see this, means you get the whole data from get_track API!")
-    save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
+    client = get_storage_client(CREDENTIAL_PATH)
+    save_progress_to_gcs(client, trackAudioAnalysis_list)
 
 ## Read progress from gcs1
 def get_track_audio_analysis_data2(**context):
     
     # try reload progress from GCS
     client = get_storage_client(CREDENTIAL_PATH)
-    progress = {
-        "last_track_uri": None,
-        "trackAudioAnalysis_list": []
-    }
+
     bucket = client.bucket("api_spotify_artists_tracks")
     blob = bucket.blob("process/track_audio_analysis_progress.json")
 
     if blob.exists():
         progress = json.loads(blob.download_as_text())
 
-    trackAudioAnalysis_list = progress["trackAudioAnalysis_list"]
-    last_track_uri = progress["last_track_uri"]
-
-    # get track URI from BigQuery
-    df = get_track_uris()
-    track_uris_bq = list(set(df['trackUri']))  # distinct TrackUri
-
-    if is_last_uri_last_in_list(track_uris_bq, last_track_uri):
-        logging.info("It is the last item in the list")
+    if progress["last_track_uri"] is None:
+        logging.info("It is the whole data!")
+    
     else:
-        #change sp token
-        access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token2', key='access_token')
-        
-        # filter track_uris list
-        track_uris = filter_track_uris(track_uris_bq, last_track_uri)
+        trackAudioAnalysis_list = progress["trackAudioAnalysis_list"]
+        last_track_uri = progress["last_track_uri"]
 
-        r_count = 0
-        for track_uri in track_uris:
-            headers = {
-            "authority": "api.spotify.com",
-            "Accept": "application/json",
-            "accept-language": "zh-TW,zh;q=0.9",
-            "app-platform": "Browser",
-            "Authorization": f"Bearer {access_token}",
-            "content-type": "application/json",
-            "Origin": "https://developer.spotify.com",
-            "Referer": "https://developer.spotify.com/",
-            "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
-            "Sec-Ch-Ua-Mobile": "?0",
-            "Sec-Ch-Ua-Platform": "\"Windows\"",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-            "Connection": "close"
-        }
+        # get track URI from BigQuery
+        df = get_track_uris()
+        track_uris_bq = list(set(df['trackUri']))  # distinct TrackUri
 
-            logging.info(f"Using access_token:{access_token}")
-            get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
+        if is_last_uri_last_in_list(track_uris_bq, last_track_uri):
+            logging.info("It is the last item in the list")
+        else:
+            #change sp token
+            access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token2', key='access_token')
+            
+            # filter track_uris list
+            track_uris = filter_track_uris(track_uris_bq, last_track_uri)
+            logging.info(f"Still have {len(track_uris)} data!")
 
-            response = requests.get(get_track_url, headers=headers,verify=False)
-
-            while response.status_code == 429:
-                logging.info(f"Reach the request limitation, saving the progress now!")
-                time.sleep(30)
-
-                client = get_storage_client(CREDENTIAL_PATH)
-
-                progress = {
-                    "last_track_uri": None,
-                    "trackAudioAnalysis_list": []
-                    }
-
-                progress["last_track_uri"] = track_uri
-                progress["trackAudioAnalysis_list"] = trackAudioAnalysis_list
-
-                save_progress_to_gcs(client, progress)  # save progress to GCS
-                logging.error("Progress saved, exiting now!")
-                raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
-                
-            if response.status_code != 200 and response.status_code != 429:# token expired
-                logging.info(f"Request a new token for retry")
-                access_token = request_new_ac_token_refresh_token_gcp1()
-                response = requests.get(
-                    get_track_url,
-                    headers = {
+            r_count = 0
+            for track_uri in track_uris:
+                headers = {
                 "authority": "api.spotify.com",
                 "Accept": "application/json",
                 "accept-language": "zh-TW,zh;q=0.9",
@@ -427,24 +411,78 @@ def get_track_audio_analysis_data2(**context):
                 "Sec-Fetch-Site": "same-site",
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
                 "Connection": "close"
-            },
-            verify=False
-                )
-            
-            track_data = response.json()
-            trackAudioAnalysis_list.append(track_data)
+            }
 
-            n = random.randint(1,5) ## gen 1~5s
-            time.sleep(n)
+                logging.info(f"Using access_token:{access_token}")
+                get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
-            r_count += 1
-            if r_count == 150:
-                time.sleep(70)
-                logging.info(f'{r_count} : time sleep 70s now!')
-                r_count = 0 
+                response = requests.get(get_track_url, headers=headers,verify=False)
 
-        logging.info("If you see this, means you get the whole data from get_track API!")
-        save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
+                while response.status_code == 429:
+                    logging.info(f"Reach the request limitation, saving the progress now!")
+                    time.sleep(30)
+
+                    client = get_storage_client(CREDENTIAL_PATH)
+
+                    progress = {
+                        "last_track_uri": track_uri,
+                        "trackAudioAnalysis_list": trackAudioAnalysis_list
+                    }
+
+                    save_progress_to_gcs(client, progress)  # save progress to GCS
+                    logging.error("Progress saved, exiting now!")
+                    raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
+                    
+                if response.status_code != 200 and response.status_code != 429:# token expired
+                    logging.info(f"Request a new token for retry")
+                    access_token = request_new_ac_token_refresh_token_gcp1()
+                    response = requests.get(
+                        get_track_url,
+                        headers = {
+                    "authority": "api.spotify.com",
+                    "Accept": "application/json",
+                    "accept-language": "zh-TW,zh;q=0.9",
+                    "app-platform": "Browser",
+                    "Authorization": f"Bearer {access_token}",
+                    "content-type": "application/json",
+                    "Origin": "https://developer.spotify.com",
+                    "Referer": "https://developer.spotify.com/",
+                    "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+                    "Sec-Ch-Ua-Mobile": "?0",
+                    "Sec-Ch-Ua-Platform": "\"Windows\"",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-site",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                    "Connection": "close"
+                },
+                verify=False
+                    )
+                
+                track_data = response.json()
+                trackAudioAnalysis_list.append(track_data)
+
+                progress = {
+                    "last_track_uri": track_uri,
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
+        
+                client = get_storage_client(CREDENTIAL_PATH)
+                save_progress_to_gcs(client, progress)  # save progress to GCS
+                logging.info("save to gcs")
+
+                # n = random.randint(1,5) ## gen 1~5s
+                # time.sleep(n)
+
+                r_count += 1
+                if r_count == 150:
+                    time.sleep(70)
+                    logging.info(f'{r_count} : time sleep 70s now!')
+                    r_count = 0 
+
+            logging.info("If you see this, means you get the whole data from get_track API!")
+            client = get_storage_client(CREDENTIAL_PATH)
+            save_progress_to_gcs(client, trackAudioAnalysis_list)
 
 ## Read progress from gcs2
 def get_track_audio_analysis_data3(**context):
@@ -461,72 +499,30 @@ def get_track_audio_analysis_data3(**context):
     if blob.exists():
         progress = json.loads(blob.download_as_text())
 
-    trackAudioAnalysis_list = progress["trackAudioAnalysis_list"]
-    last_track_uri = progress["last_track_uri"]
-
-    # get track URI from BigQuery
-    df = get_track_uris()
-    track_uris_bq = list(set(df['trackUri']))  # distinct TrackUri
-
-    if is_last_uri_last_in_list(track_uris_bq, last_track_uri):
-        logging.info("It is the last item in the list")
+    if progress["last_track_uri"] is None:
+        logging.info("It is the whole data!")
+    
     else:
-        #change sp token
-        access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token3', key='access_token')
-        
-        # filter track_uris list
-        track_uris = filter_track_uris(track_uris_bq, last_track_uri)
+        trackAudioAnalysis_list = progress["trackAudioAnalysis_list"]
+        last_track_uri = progress["last_track_uri"]
 
-        r_count = 0
-        for track_uri in track_uris:
-            headers = {
-            "authority": "api.spotify.com",
-            "Accept": "application/json",
-            "accept-language": "zh-TW,zh;q=0.9",
-            "app-platform": "Browser",
-            "Authorization": f"Bearer {access_token}",
-            "content-type": "application/json",
-            "Origin": "https://developer.spotify.com",
-            "Referer": "https://developer.spotify.com/",
-            "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
-            "Sec-Ch-Ua-Mobile": "?0",
-            "Sec-Ch-Ua-Platform": "\"Windows\"",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "same-site",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-            "Connection": "close"
-        }
+        # get track URI from BigQuery
+        df = get_track_uris()
+        track_uris_bq = list(set(df['trackUri']))  # distinct TrackUri
 
-            logging.info(f"Using access_token:{access_token}")
-            get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
+        if is_last_uri_last_in_list(track_uris_bq, last_track_uri):
+            logging.info("It is the last item in the list")
+        else:
+            #change sp token
+            access_token = context['task_instance'].xcom_pull(task_ids='check_if_need_update_token3', key='access_token')
+            
+            # filter track_uris list
+            track_uris = filter_track_uris(track_uris_bq, last_track_uri)
+            logging.info(f"Still have {len(track_uris)} data!")
 
-            response = requests.get(get_track_url, headers=headers,verify=False)
-
-            while response.status_code == 429:
-                logging.info(f"Reach the request limitation, saving the progress now!")
-                time.sleep(30)
-
-                client = get_storage_client(CREDENTIAL_PATH)
-
-                progress = {
-                    "last_track_uri": None,
-                    "trackAudioAnalysis_list": []
-                    }
-
-                progress["last_track_uri"] = track_uri
-                progress["trackAudioAnalysis_list"] = trackAudioAnalysis_list
-
-                save_progress_to_gcs(client, progress)  # save progress to GCS
-                logging.error("Progress saved, exiting now!")
-                raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
-                
-            if response.status_code != 200 and response.status_code != 429:# token expired
-                logging.info(f"Request a new token for retry")
-                access_token = request_new_ac_token_refresh_token_gcp1()
-                response = requests.get(
-                    get_track_url,
-                    headers = {
+            r_count = 0
+            for track_uri in track_uris:
+                headers = {
                 "authority": "api.spotify.com",
                 "Accept": "application/json",
                 "accept-language": "zh-TW,zh;q=0.9",
@@ -543,24 +539,78 @@ def get_track_audio_analysis_data3(**context):
                 "Sec-Fetch-Site": "same-site",
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
                 "Connection": "close"
-            },
-            verify=False
-                )
-            
-            track_data = response.json()
-            trackAudioAnalysis_list.append(track_data)
+            }
 
-            n = random.randint(1,5) ## gen 1~5s
-            time.sleep(n)
+                logging.info(f"Using access_token:{access_token}")
+                get_track_url = f"https://api.spotify.com/v1/audio-analysis/{track_uri}"
 
-            r_count += 1
-            if r_count == 150:
-                time.sleep(70)
-                logging.info(f'{r_count} : time sleep 70s now!')
-                r_count = 0 
+                response = requests.get(get_track_url, headers=headers,verify=False)
 
-        logging.info("If you see this, means you get the whole data from get_track API!")
-        save_progress_to_gcs(client, trackAudioAnalysis_list)  # save progress to GCS
+                while response.status_code == 429:
+                    logging.info(f"Reach the request limitation, saving the progress now!")
+                    time.sleep(30)
+
+                    client = get_storage_client(CREDENTIAL_PATH)
+
+                    progress = {
+                        "last_track_uri": track_uri,
+                        "trackAudioAnalysis_list": trackAudioAnalysis_list
+                    }
+
+                    save_progress_to_gcs(client, progress)  # save progress to GCS
+                    logging.error("Progress saved, exiting now!")
+                    raise Exception("Exceeded retry limit, exiting.")  # raise error make sure task failed
+                    
+                if response.status_code != 200 and response.status_code != 429:# token expired
+                    logging.info(f"Request a new token for retry")
+                    access_token = request_new_ac_token_refresh_token_gcp1()
+                    response = requests.get(
+                        get_track_url,
+                        headers = {
+                    "authority": "api.spotify.com",
+                    "Accept": "application/json",
+                    "accept-language": "zh-TW,zh;q=0.9",
+                    "app-platform": "Browser",
+                    "Authorization": f"Bearer {access_token}",
+                    "content-type": "application/json",
+                    "Origin": "https://developer.spotify.com",
+                    "Referer": "https://developer.spotify.com/",
+                    "Sec-Ch-Ua": "\"Google Chrome\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+                    "Sec-Ch-Ua-Mobile": "?0",
+                    "Sec-Ch-Ua-Platform": "\"Windows\"",
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-site",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                    "Connection": "close"
+                },
+                verify=False
+                    )
+                
+                track_data = response.json()
+                trackAudioAnalysis_list.append(track_data)
+
+                progress = {
+                    "last_track_uri": track_uri,
+                    "trackAudioAnalysis_list": trackAudioAnalysis_list
+                }
+        
+                client = get_storage_client(CREDENTIAL_PATH)
+                save_progress_to_gcs(client, progress)  # save progress to GCS
+                logging.info("save to gcs")
+
+                # n = random.randint(1,5) ## gen 1~5s
+                # time.sleep(n)
+
+                r_count += 1
+                if r_count == 150:
+                    time.sleep(70)
+                    logging.info(f'{r_count} : time sleep 70s now!')
+                    r_count = 0 
+
+            logging.info("If you see this, means you get the whole data from get_track API!")
+            client = get_storage_client(CREDENTIAL_PATH)
+            save_progress_to_gcs(client, trackAudioAnalysis_list)
 
 
 def store_data_in_gcs():
