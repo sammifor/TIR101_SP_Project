@@ -73,9 +73,10 @@ def export_to_BQ():
     #     bigquery.SchemaField("column2", "INTEGER"),
     # ]
     load_gcs_to_bigquery(
-        gcs_uri=f"gs://api_spotify_artists_tracks/expand_table_2017_2024.csv",
+        gcs_uri=f"gs://api_spotify_artists_tracks/changeDataType/expand_table_2017_2024.csv",
         dataset_id='stage_ChangeDataType',
         table_id=f'expand_table_2017_2024',
+        schema=None,
         skip_rows=1
     )
 
