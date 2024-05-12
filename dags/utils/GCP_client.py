@@ -31,6 +31,23 @@ def get_storage_client(CREDENTIAL_PATH) -> storage.Client:
 
 def load_gcs_to_bigquery(gcs_uri, dataset_id, table_id, schema, skip_rows=0):
     bigquery_client = get_bq_client(CREDENTIAL_PATH)
+    project_id = "affable-hydra-422306-r3"
+
+    # 檢查DataSet & table是否存在，如果不存在，則創建
+    try:
+        dataset = bigquery_client.get_dataset(f"{project_id}.{dataset_id}")
+    except Exception as e:
+        logging.error(f"Dataset {dataset_id} does not exist. Creating dataset...")
+        dataset = bigquery.Dataset(f"{project_id}.{dataset_id}")
+        dataset.location = "EU"
+        dataset = bigquery_client.create_dataset(dataset)
+
+    try:
+        table = bigquery_client.get_table(f"{project_id}.{dataset_id}.{table_id}")
+    except Exception as e:
+        logging.error(f"Table {table_id} does not exist in dataset {dataset_id}. Creating table...")
+        table = bigquery.Table(f"{project_id}.{dataset_id}.{table_id}", schema=schema)
+        table = bigquery_client.create_table(table)
 
     # bq 先定義config
     job_config = bigquery.LoadJobConfig(

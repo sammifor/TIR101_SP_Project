@@ -101,8 +101,8 @@ def export_to_BQ():
 
     for year in range(2017,2025):
         load_gcs_to_bigquery(
-            gcs_uri=f"gs://api_spotify_artists_tracks/changeDataType/{year}.csv",
-            dataset_id='stage_ChangeDataType',
+            gcs_uri = f"gs://api_spotify_artists_tracks/changeDataType/{year}.csv",
+            dataset_id = 'stage_ChangeDataType',
             table_id=f'{year}',
             schema=None,
             skip_rows=1
