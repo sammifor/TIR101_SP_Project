@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.task_group import TaskGroup
 from airflow.utils.trigger_rule import TriggerRule 
-from worker_refresh_token import get_latest_refresh_token, get_latest_ac_token, request_new_ac_token_refresh_token
+from worker_refresh_token import get_latest_token, request_new_ac_token_refresh_token
 import itertools
 from google.oauth2 import service_account
 from google.cloud import bigquery
@@ -38,27 +38,22 @@ default_args = {
     'on_success_callback': DiscordNotifier(msg=" ✅️Task Run Success!✅")
 }
 
-def check_if_need_update_token(start_time, current_worker_name, current_worker, worker_cycle):
-    current_time = time.time()
+def check_if_need_update_token(current_worker_name, current_worker):
+    current_time = int(time.time())
     logging.info(f"Current worker: {current_worker_name}")
 
     client_id = current_worker["client_id"]
     secret = current_worker["client_secret"]
-    access_last_update = get_latest_refresh_token(current_worker_name)[1]
-    access_token = get_latest_ac_token(current_worker_name)[0]
+    access_last_update = get_latest_token(current_worker_name)[1]
+    access_token = get_latest_token(current_worker_name)[0]
 
     logging.info(f"using access_token: {access_token}")
 
     if access_last_update + 3500 <= current_time: # means token has been expired, default is 3600, make it 3500 to ensure we have enough time
+        # logging.info(f"access_last_update:{access_last_update} +3500 = {access_last_update+3500} current_time:{current_time}")
         access_token = request_new_ac_token_refresh_token(current_worker_name,
         current_worker["client_id"], current_worker["client_secret"])
     
-    elapsed_time = current_time - start_time
-    if elapsed_time >= 10:
-        start_time = current_time
-        print("Doing switch worker !!")
-        current_worker_name, current_worker = next(worker_cycle)
-        time.sleep(1)
     return access_token
 
 def get_track_data():
@@ -67,7 +62,7 @@ def get_track_data():
     track_uris = list(set(df['trackUri'])) #distinct TrackUri
 
     trackAudioFeatures_list = []
-    start_time = time.time()
+    start_time = int(time.time())
 
     workers = get_workers()
     #看不懂
@@ -79,10 +74,18 @@ def get_track_data():
 
     for track_uri in track_uris:
 
-        if not is_last_uri_last_in_list(track_uris, track_uris):
+        current_time = int(time.time())
+        elapsed_time = current_time - start_time
+        
+        if elapsed_time >= 30:
+            start_time = current_time
+            print(f"{elapsed_time} - Doing switch worker !!")
+            current_worker_name, current_worker = next(worker_cycle)
+            time.sleep(1)
 
-            access_token = check_if_need_update_token(start_time, current_worker_name, current_worker, worker_cycle)
-            
+        if not is_last_uri_last_in_list(track_uris, track_uris):
+            access_token = check_if_need_update_token(current_worker_name, current_worker)
+
             trackData_list = []
             headers = {
                 'accept': '*/*',
@@ -107,7 +110,7 @@ def get_track_data():
                 if response.status_code == 429:
                     logging.info(f"Reach the request limitation, change the worker now!")
                     time.sleep(10)
-                    access_token = check_if_need_update_token(start_time, current_worker_name, current_worker, worker_cycle)
+                    access_token = check_if_need_update_token(current_worker_name, current_worker)
                     response = requests.get(get_track_url,
                                             headers={
                                                 'accept': '*/*',
@@ -133,8 +136,8 @@ def get_track_data():
                 count += 1
                 logging.info(f"{count}-{track_uri}")
 
-                n = random.randint(1,3)  ## gen 1~3s
-                time.sleep(n)
+                # n = random.randint(1,3)  ## gen 1~3s
+                time.sleep(1)
 
                 #每100筆睡2秒
                 if count % 100 == 0:
