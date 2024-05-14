@@ -16,7 +16,7 @@ BUCKET_FILE_PATH = {
     "getTrack": "gs://api_spotify_artists_tracks/output/worker_get_track_progress_1724.json",
     "getTrackAudioAnalysis": "gs://api_spotify_artists_tracks/output/worker_get_track_audio_analysis_progress_1724.json",
     "getTrackFeatures": "gs://api_spotify_artists_tracks/output/worker_get_track_audio_features_progress_1724.json",
-    "getArtist": "gs://api_spotify_artists_tracks/output/worker_get_artists_progress_1724.json",
+    "getArtist": "gs://api_spotify_artists_tracks/output/worker_get_artist_progress_1724.json",
 }
 DATASET_ID_TRACK = "stage_TrackSet"
 DATASET_ID_ARTIST = "stage_ArtistSet"
