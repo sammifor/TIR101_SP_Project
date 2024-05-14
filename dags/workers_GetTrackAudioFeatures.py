@@ -249,7 +249,7 @@ def process_data_in_gcs():
 
 
 with DAG(
-    "workers_GetTrackAudioAnalysis.py",
+    "workers_GetTrackAudioFeatures.py",
     default_args=default_args,
     schedule_interval="@monthly",
     catchup=False,
