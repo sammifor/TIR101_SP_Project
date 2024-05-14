@@ -152,3 +152,5 @@ cython_debug/
 logs/
 cloud/
 dags/__pycache__/*
+dags/old_file/*
+dags/rawdata/*
