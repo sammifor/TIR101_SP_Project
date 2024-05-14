@@ -28,10 +28,10 @@ from requests.exceptions import SSLError, ConnectionError
 
 urllib3.disable_warnings()
 
-BUCKET_FILE_PATH = "process/worker_get_track_progress_1724.json"
-LOCAL_FILE_PATH = "worker_get_track_progress_1724.csv"
-API = "https://api.spotify.com/v1/tracks/{}"
-DATA_LIST_NAME = "trackData_list"
+BUCKET_FILE_PATH = "process/worker_get_track_audio_features_progress_1724.json"
+LOCAL_FILE_PATH = "worker_get_track_audio_features_progress_1724.csv"
+API = "https://api.spotify.com/v1/audio-features/{}"
+DATA_LIST_NAME = "trackAudioFeatures_list"
 URI_TYPE = "track"
 
 # you may change the email to yours, if you want to change the sender's info, you may go config/airflow.cfg replace [smpt] related information.
@@ -154,7 +154,7 @@ def for_loop_get_response(
             except (SSLError, ConnectionError) as e:
                 response = requests.get(get_track_url, headers=headers, verify=False)
                 logging.info(f"get the {e} data again done!")
-
+                
                 track_data = response.json()
                 trackData_list.append(track_data)
 
@@ -167,7 +167,6 @@ def for_loop_get_response(
 
                 # save progress to GCS
                 save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
-
                 raise AirflowFailException("Connection error, marking DAG as failed.")
 
     return trackData_list
@@ -231,59 +230,17 @@ def process_data_in_gcs():
     bucket = client.bucket("api_spotify_artists_tracks")
     blob = bucket.blob(BUCKET_FILE_PATH)
 
-    trackData_list = json.loads(blob.download_as_text())
+    trackAudioFeatures_list = json.loads(blob.download_as_text())
 
     # Extend data
-    df = pd.json_normalize(trackData_list).drop(
-        columns=["album.images", "available_markets"]
-    )
-    df_exploded = df.explode("artists")
-    df_artists = pd.json_normalize(df_exploded["artists"])
-
-    # rename
-    rename_columns = {
-        "href": "artists.href",
-        "id": "artists.id",
-        "name": "artists.name",
-        "type": "artists.type",
-        "uri": "artists.uri",
-        "external_urls.spotify": "artists.external_urls.spotify",
-    }
-    df_rename = df_artists.rename(columns=rename_columns)
-    df_final = df_exploded.drop(columns="artists")
-
-    df_final["artists.href"] = df_rename["artists.href"]
-    df_final["artists.id"] = df_rename["artists.id"]
-    df_final["artists.name"] = df_rename["artists.name"]
-    df_final["artists.type"] = df_rename["artists.type"]
-    df_final["artists.uri"] = df_rename["artists.uri"]
-    df_final["artists.external_urls.spotify"] = df_rename[
-        "artists.external_urls.spotify"
-    ]
-
-    # make sure the type of date is correct
-    for index, row in df_final.iterrows():
-        if row["album.release_date"] == "0000":
-            df_final.loc[index, "album.release_date"] = "1970-01-01"
-            print(f"{df_final.loc[index, 'uri']}")
-        elif row["album.release_date_precision"] == "year":
-            df_final.loc[index, "album.release_date"] = (
-                str(row["album.release_date"]) + "-01-01"
-            )
-            print(f"{df_final.loc[index, 'uri']}")
-
-        elif row["album.release_date_precision"] == "month":
-            df_final.loc[index, "album.release_date"] = (
-                str(row["album.release_date"]) + "-01"
-            )
-            print(f"{df_final.loc[index, 'uri']}")
+    df_trackAudioFeatures = pd.json_normalize(trackAudioFeatures_list)
 
     # Upload to GCS
     local_file_path = LOCAL_FILE_PATH
     gcs_bucket = "api_spotify_artists_tracks"
     gcs_file_name = f"output/{local_file_path}"
 
-    df_final.to_csv(local_file_path, index=False)
+    df_trackAudioFeatures.to_csv(local_file_path, index=False)
 
     bucket = client.get_bucket(gcs_bucket)
     blob = bucket.blob(gcs_file_name)
