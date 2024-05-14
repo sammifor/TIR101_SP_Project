@@ -4,17 +4,22 @@ from airflow.operators.python import PythonOperator
 import logging
 from utils.DiscordNotifier import DiscordNotifier
 import pandas as pd
-from utils.GCP_client import get_bq_client, get_storage_client, load_gcs_to_bigquery_native, load_gcs_to_bigquery_external
+from utils.GCP_client import (
+    get_bq_client,
+    get_storage_client,
+    load_gcs_to_bigquery_native,
+    load_gcs_to_bigquery_external,
+)
 from google.cloud import bigquery
 
 default_args = {
-    'owner': 'airflow',
-    'start_date': datetime(2024, 4, 2),
+    "owner": "airflow",
+    "start_date": datetime(2024, 4, 2),
     # 'email': ['a1752815@gmail.com'],
     # 'email_on_failure': True,
     # 'email_on_success': True
-    'on_failure_callback': DiscordNotifier(msg=" ⚠️️Task Run Failed!⚠️"),
-    'on_success_callback': DiscordNotifier(msg=" ✅️Task Run Success!✅")
+    "on_failure_callback": DiscordNotifier(msg=" ⚠️️Task Run Failed!⚠️"),
+    "on_success_callback": DiscordNotifier(msg=" ✅️Task Run Success!✅"),
 }
 
 
@@ -75,45 +80,59 @@ default_args = {
 
 
 def export_to_BQ():
-    '''
+    """
     export gcs data to BigQuery, and parameter define which type of table you want to export
-    '''
+    """
 
     # schema = [
     #     bigquery.SchemaField("column1", "STRING"),
     #     bigquery.SchemaField("column2", "INTEGER"),
     # ]
-    table_type = 'native'
+    table_type = "native"
 
-    if table_type == 'native':
+    if table_type == "native":
         # Native table
         load_gcs_to_bigquery_native(
-            gcs_uri=['gs://api_spotify_artists_tracks/changeDataType/2017.csv', 'gs://api_spotify_artists_tracks/changeDataType/2018.csv',
-                     'gs://api_spotify_artists_tracks/changeDataType/2019.csv', 'gs://api_spotify_artists_tracks/changeDataType/2020.csv',
-                     'gs://api_spotify_artists_tracks/changeDataType/2021.csv', 'gs://api_spotify_artists_tracks/changeDataType/2022.csv',
-                     'gs://api_spotify_artists_tracks/changeDataType/2023.csv', 'gs://api_spotify_artists_tracks/changeDataType/2024.csv'],
-            dataset_id='stage_ChangeDataType',
-            table_id=f'expand_table_2017_2024',
+            gcs_uri=[
+                "gs://api_spotify_artists_tracks/changeDataType/2017.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2018.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2019.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2020.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2021.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2022.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2023.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2024.csv",
+            ],
+            dataset_id="stage_ChangeDataType",
+            table_id=f"expand_table_2017_2024",
             schema=None,
-            skip_rows=1
+            skip_rows=1,
         )
-    elif table_type == 'external':
+    elif table_type == "external":
         # external table
         load_gcs_to_bigquery_external(
-            gcs_uri=['gs://api_spotify_artists_tracks/changeDataType/2017.csv', 'gs://api_spotify_artists_tracks/changeDataType/2018.csv',
-                     'gs://api_spotify_artists_tracks/changeDataType/2019.csv', 'gs://api_spotify_artists_tracks/changeDataType/2020.csv',
-                     'gs://api_spotify_artists_tracks/changeDataType/2021.csv', 'gs://api_spotify_artists_tracks/changeDataType/2022.csv',
-                     'gs://api_spotify_artists_tracks/changeDataType/2023.csv', 'gs://api_spotify_artists_tracks/changeDataType/2024.csv'],
-            dataset_id='stage_ChangeDataType',
-            table_id=f'expand_table_2017_2024',
-            external_source_format='CSV',
+            gcs_uri=[
+                "gs://api_spotify_artists_tracks/changeDataType/2017.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2018.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2019.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2020.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2021.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2022.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2023.csv",
+                "gs://api_spotify_artists_tracks/changeDataType/2024.csv",
+            ],
+            dataset_id="stage_ChangeDataType",
+            table_id=f"expand_table_2017_2024",
+            external_source_format="CSV",
         )
 
 
-with DAG('merge_chart_data_to_GCS.py',
-         default_args=default_args,
-         schedule_interval="@monthly",
-         catchup=False) as dag:
+with DAG(
+    "merge_chart_data_to_GCS.py",
+    default_args=default_args,
+    schedule_interval="@monthly",
+    catchup=False,
+) as dag:
 
     # merge_output_gcs = PythonOperator(
     #     task_id='merge_output_gcs',
@@ -122,7 +141,7 @@ with DAG('merge_chart_data_to_GCS.py',
     # )
 
     export_to_BQ = PythonOperator(
-        task_id='export_to_BQ',
+        task_id="export_to_BQ",
         python_callable=export_to_BQ,
         provide_context=True,
     )

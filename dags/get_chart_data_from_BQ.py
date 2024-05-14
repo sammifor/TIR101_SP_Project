@@ -13,7 +13,6 @@ from utils.GCP_client import (
     load_gcs_to_bigquery_native,
     load_gcs_to_bigquery_external,
 )
-import os
 
 default_args = {
     "owner": "airflow",
@@ -44,8 +43,6 @@ DATASET = {
     2024: RAWDATA_2024,
 }
 
-# get chart data from bigQuery
-
 
 def get_chart_data_from_BQ(dataset: str) -> pd.DataFrame:
     """
@@ -62,9 +59,6 @@ def get_chart_data_from_BQ(dataset: str) -> pd.DataFrame:
 
     df = client.query(query).to_dataframe()
     return df
-
-
-# save to gcs
 
 
 def save_to_gcs(year: str, progress: pd.DataFrame) -> None:
@@ -85,9 +79,6 @@ def save_to_gcs(year: str, progress: pd.DataFrame) -> None:
     blob.upload_from_filename(file_path)
 
     logging.info(f"{file_path} save to gcs!")
-
-
-# clean data
 
 
 def expand_and_change_datatype() -> None:
@@ -137,13 +128,15 @@ def expand_and_change_datatype() -> None:
         artists_labels = pd.concat([df_reset, df_artists, labels_name], axis=1)
 
         # 整理Uri
-        print(artists_labels.columns)
+        # print(artists_labels.columns)
         artists_labels["artistUri"] = artists_labels["artistUri"].apply(
             lambda x: x.split(":")[2]
         )
         artists_labels["trackUri"] = artists_labels["trackUri"].apply(
             lambda x: x.split(":")[2]
         )
+
+        # print(artists_labels["artistUri"], artists_labels["trackUri"])
 
         save_to_gcs(year, artists_labels)
 
