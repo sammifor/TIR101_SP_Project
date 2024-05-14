@@ -84,6 +84,7 @@ def for_loop_get_response(track_uris: list, last_track_uri: str, trackData_list:
             }
 
             get_track_url = API.format(track_uri)
+            print(get_track_url)
 
             try:
                 response = requests.get(
@@ -232,6 +233,22 @@ def process_data_in_gcs():
     df_final['artists.type'] = df_rename['artists.type']
     df_final['artists.uri'] = df_rename['artists.uri']
     df_final['artists.external_urls.spotify'] = df_rename['artists.external_urls.spotify']
+
+#make sure the type of date is correct
+    for index, row in df_final.iterrows():
+        if row['album.release_date'] == '0000':
+            df_final.loc[index, 'album.release_date'] = '1970-01-01'
+            print(f"{df_final.loc[index, 'uri']}")
+        elif row['album.release_date_precision'] == 'year':
+            df_final.loc[index, 'album.release_date'] = str(row['album.release_date']) + '-01-01'
+            print(f"{df_final.loc[index, 'uri']}")
+        
+        elif row['album.release_date_precision'] == 'month':
+            df_final.loc[index, 'album.release_date'] = str(row['album.release_date']) + '-01'
+            print(f"{df_final.loc[index, 'uri']}")
+    
+
+
 
     # Upload to GCS
     local_file_path = LOCAL_FILE_PATH

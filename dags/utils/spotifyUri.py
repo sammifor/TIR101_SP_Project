@@ -12,7 +12,7 @@ def get_track_uris() -> pd.DataFrame:
     query = """
     SELECT DISTINCT trackUri
     FROM `affable-hydra-422306-r3.stage_ChangeDataType.expand_table_2017_2024`
-    LIMIT 100
+    LIMIT 10
     """
     df = client.query(query).to_dataframe()
     logging.info(f"There are {len(df)} trackUris!")
@@ -68,7 +68,7 @@ def check_missing_data(uri_type: str, data: list) -> bool:
 
     logging.info(
         f"download {len(data)} data from API, orginal data has {chart_uris}")
-    return len(data) == len(chart_uris)
+    return len(data) == chart_uris
 
 
 def find_missing_data(uri_type: str, data: list) -> list:

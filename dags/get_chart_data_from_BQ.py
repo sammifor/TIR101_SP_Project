@@ -89,6 +89,8 @@ def expand_and_change_datatype() -> None:
         expanded_df1 = pd.json_normalize(df['trackMetadata'].apply(json.loads))
         result_df = pd.concat([df, expanded_df, expanded_df1], axis=1).drop(columns=[
             'chartEntryData', 'trackMetadata', 'producers', 'songWriters', 'displayImageUri', 'rankingMetric.type'])
+        result_df['trackUri'] = result_df['trackUri'].apply(
+            lambda x: x.split(':')[2])
 
         explode_artists = result_df.explode('artists')
         explode_labels = explode_artists.explode('labels')
@@ -96,7 +98,8 @@ def expand_and_change_datatype() -> None:
         expanded_artists = pd.json_normalize(
             explode_labels['artists']).drop(columns='externalUrl')
         expanded_artists["artist_name"] = expanded_artists["name"]
-        expanded_artists["artistUri"] = expanded_artists["spotifyUri"]
+        expanded_artists["artistUri"] = expanded_artists["spotifyUri"].apply(
+            lambda x: x.split(':')[2])
         df_artists = expanded_artists.drop(columns=['name', 'spotifyUri'])
 
         expanded_labels = pd.json_normalize(explode_labels['labels']).drop(
