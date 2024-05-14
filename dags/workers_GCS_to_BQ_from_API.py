@@ -1,14 +1,13 @@
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from airflow.operators.sensors import ExternalTaskSensor
+from airflow.sensors.external_task import ExternalTaskSensor
 from utils.DiscordNotifier import DiscordNotifier
-import pandas as pd
 from utils.GCP_client import (
     load_gcs_to_bigquery_native,
     load_gcs_to_bigquery_external,
 )
-from google.cloud import bigquery
+
 
 BUCKET_FILE_PATH = {
     "getTrack": "gs://api_spotify_artists_tracks/output/worker_get_track_progress_1724.json",
@@ -89,7 +88,6 @@ with DAG(
     export_to_BQ = PythonOperator(
         task_id="export_to_BQ",
         python_callable=export_to_BQ,
-        description="This DAG waiting for workers_GetArtist, workers_GetTrack, workers_GetTrackAudioAnalysis, workers_GetTrackAudioFeatures",
         provide_context=True,
     )
 

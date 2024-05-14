@@ -154,7 +154,7 @@ def for_loop_get_response(
             except (SSLError, ConnectionError) as e:
                 response = requests.get(get_track_url, headers=headers, verify=False)
                 logging.info(f"get the {e} data again done!")
-                
+
                 track_data = response.json()
                 trackData_list.append(track_data)
 
@@ -249,7 +249,7 @@ def process_data_in_gcs():
 
 
 with DAG(
-    "workers_GetTrack.py",
+    "workers_GetTrackAudioAnalysis.py",
     default_args=default_args,
     schedule_interval="@monthly",
     catchup=False,
