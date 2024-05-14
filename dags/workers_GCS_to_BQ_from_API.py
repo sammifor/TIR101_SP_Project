@@ -1,12 +1,10 @@
 from datetime import datetime
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-import logging
+from airflow.operators.sensors import ExternalTaskSensor
 from utils.DiscordNotifier import DiscordNotifier
 import pandas as pd
 from utils.GCP_client import (
-    get_bq_client,
-    get_storage_client,
     load_gcs_to_bigquery_native,
     load_gcs_to_bigquery_external,
 )
@@ -82,23 +80,53 @@ def export_to_BQ():
 
 
 with DAG(
-    "merge_chart_data_to_GCS.py",
+    "workers_GCS_to_BQ_from_API.py",
     default_args=default_args,
     schedule_interval="@monthly",
     catchup=False,
 ) as dag:
 
-    # merge_output_gcs = PythonOperator(
-    #     task_id='merge_output_gcs',
-    #     python_callable=merge_output_gcs,
-    #     provide_context=True,
-    # )
-
     export_to_BQ = PythonOperator(
         task_id="export_to_BQ",
         python_callable=export_to_BQ,
+        description="This DAG waiting for workers_GetArtist, workers_GetTrack, workers_GetTrackAudioAnalysis, workers_GetTrackAudioFeatures",
         provide_context=True,
     )
 
-    # merge_output_gcs >>
-    export_to_BQ
+    # Define sensors for other DAGs
+    wait_for_workers_GetArtist = ExternalTaskSensor(
+        task_id="wait_for_workers_GetArtist",
+        external_dag_id="workers_GetArtist.py",
+        external_task_id="process_data_in_gcs",
+        dag=dag,
+    )
+
+    wait_for_workers_GetTrack = ExternalTaskSensor(
+        task_id="wait_for_workers_GetTrack",
+        external_dag_id="workers_GetTrack.py",
+        external_task_id="process_data_in_gcs",
+        dag=dag,
+    )
+
+    wait_for_workers_GetTrackAudioAnalysis = ExternalTaskSensor(
+        task_id="wait_for_workers_GetTrackAudioAnalysis",
+        external_dag_id="workers_GetTrackAudioAnalysis.py",
+        external_task_id="process_data_in_gcs",
+        dag=dag,
+    )
+
+    wait_for_workers_GetTrackAudioFeatures = ExternalTaskSensor(
+        task_id="wait_for_workers_GetTrackAudioFeatures",
+        external_dag_id="workers_GetTrackAudioFeatures.py",
+        external_task_id="process_data_in_gcs",
+        dag=dag,
+    )
+
+    # Set task dependencies
+    (
+        wait_for_workers_GetArtist
+        >> wait_for_workers_GetTrack
+        >> wait_for_workers_GetTrackAudioAnalysis
+        >> wait_for_workers_GetTrackAudioFeatures
+        >> export_to_BQ
+    )
