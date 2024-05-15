@@ -233,7 +233,7 @@ def check_no_missing_data(**context):
 def process_data_in_gcs():
 
     client = get_storage_client()
-    bucket = client.bucket("api_spotify_artists_artists")
+    bucket = client.bucket("api_spotify_artists_tracks")
     blob = bucket.blob(BUCKET_FILE_PATH)
 
     artistData_list = json.loads(blob.download_as_text())
@@ -244,7 +244,7 @@ def process_data_in_gcs():
 
     # Upload to GCS
     local_file_path = LOCAL_FILE_PATH
-    gcs_bucket = "api_spotify_artists_artists"
+    gcs_bucket = "api_spotify_artists_tracks"
     gcs_file_name = f"output/{local_file_path}"
 
     df_genres.to_csv(local_file_path, index=False)
