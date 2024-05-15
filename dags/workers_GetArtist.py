@@ -2,7 +2,6 @@ import logging
 from utils.DiscordNotifier import DiscordNotifier
 from utils.spotifyUri import (
     get_artist_uris,
-    is_last_uri_last_in_list,
     filter_artist_uris,
     check_missing_data,
     find_missing_data,
@@ -46,9 +45,7 @@ default_args = {
 }
 
 
-def for_loop_get_response(
-    artist_uris: list, last_artist_uri: str, artistData_list: list
-) -> list:
+def for_loop_get_response(artist_uris: list, artistData_list: list) -> list:
     """
     for loop to get API response
     """
@@ -72,95 +69,70 @@ def for_loop_get_response(
             current_worker_name, current_worker = next(worker_cycle)
             time.sleep(1)
 
-        if not is_last_uri_last_in_list(artist_uris, last_artist_uri):
-            access_token = check_if_need_update_token(
-                current_worker_name, current_worker
-            )
+        access_token = check_if_need_update_token(current_worker_name, current_worker)
 
-            headers = {
-                "accept": "*/*",
-                "accept-language": "zh-TW,zh;q=0.8",
-                "authorization": f"Bearer {access_token}",
-                "origin": "https://developer.spotify.com",
-                "referer": "https://developer.spotify.com/",
-                "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-platform": '"macOS"',
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-site",
-                "sec-gpc": "1",
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-                "Connection": "close",
-            }
+        headers = {
+            "accept": "*/*",
+            "accept-language": "zh-TW,zh;q=0.8",
+            "authorization": f"Bearer {access_token}",
+            "origin": "https://developer.spotify.com",
+            "referer": "https://developer.spotify.com/",
+            "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"macOS"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Connection": "close",
+        }
 
-            get_artist_url = API.format(artist_uri)
-            print(get_artist_url)
+        get_artist_url = API.format(artist_uri)
+        print(get_artist_url)
 
-            try:
-                response = requests.get(get_artist_url, headers=headers, verify=False)
+        try:
+            response = requests.get(get_artist_url, headers=headers, verify=False)
 
-                if response.status_code == 429:
-                    logging.info(
-                        f"Reach the request limitation, change the worker now!"
-                    )
-                    time.sleep(10)
-                    access_token = check_if_need_update_token(
-                        current_worker_name, current_worker
-                    )
-                    response = requests.get(
-                        get_artist_url,
-                        headers={
-                            "accept": "*/*",
-                            "accept-language": "zh-TW,zh;q=0.8",
-                            "authorization": f"Bearer {access_token}",
-                            "origin": "https://developer.spotify.com",
-                            "referer": "https://developer.spotify.com/",
-                            "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-                            "sec-ch-ua-mobile": "?0",
-                            "sec-ch-ua-platform": '"macOS"',
-                            "sec-fetch-dest": "empty",
-                            "sec-fetch-mode": "cors",
-                            "sec-fetch-site": "same-site",
-                            "sec-gpc": "1",
-                            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-                            "Connection": "close",
-                        },
-                        verify=False,
-                    )
+            if response.status_code == 429:
+                logging.info(f"Reach the request limitation, change the worker now!")
+                time.sleep(10)
+                access_token = check_if_need_update_token(
+                    current_worker_name, current_worker
+                )
+                response = requests.get(
+                    get_artist_url,
+                    headers={
+                        "accept": "*/*",
+                        "accept-language": "zh-TW,zh;q=0.8",
+                        "authorization": f"Bearer {access_token}",
+                        "origin": "https://developer.spotify.com",
+                        "referer": "https://developer.spotify.com/",
+                        "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+                        "sec-ch-ua-mobile": "?0",
+                        "sec-ch-ua-platform": '"macOS"',
+                        "sec-fetch-dest": "empty",
+                        "sec-fetch-mode": "cors",
+                        "sec-fetch-site": "same-site",
+                        "sec-gpc": "1",
+                        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                        "Connection": "close",
+                    },
+                    verify=False,
+                )
 
-                artist_data = response.json()
-                artistData_list.append(artist_data)
+            artist_data = response.json()
+            artistData_list.append(artist_data)
 
-                count += 1
-                logging.info(f"{count}-{artist_uri}")
+            count += 1
+            logging.info(f"{count}-{artist_uri}")
 
-                # n = random.randint(1,3)  ## gen 1~3s
-                time.sleep(1)
+            # n = random.randint(1,3)  ## gen 1~3s
+            time.sleep(1)
 
-                # 每100筆睡2秒
-                if count % 100 == 0:
-                    time.sleep(2)
-                    client = get_storage_client()
-
-                    progress = {
-                        "last_artist_uri": artist_uri,
-                        DATA_LIST_NAME: artistData_list,
-                    }
-
-                    # save progress to GCS
-                    save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
-
-            except (SSLError, ConnectionError) as e:
-                response = requests.get(get_artist_url, headers=headers, verify=False)
-                logging.info(f"get the {e} data again done!")
-
-                artist_data = response.json()
-                artistData_list.append(artist_data)
-
-                count += 1
-                logging.info(f"{count}-{artist_uri}")
-
+            # 每100筆睡2秒
+            if count % 100 == 0:
+                time.sleep(2)
                 client = get_storage_client()
 
                 progress = {
@@ -171,7 +143,27 @@ def for_loop_get_response(
                 # save progress to GCS
                 save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
 
-                raise AirflowFailException("Connection error, marking DAG as failed.")
+        except (SSLError, ConnectionError) as e:
+            response = requests.get(get_artist_url, headers=headers, verify=False)
+            logging.info(f"get the {e} data again done!")
+
+            artist_data = response.json()
+            artistData_list.append(artist_data)
+
+            count += 1
+            logging.info(f"{count}-{artist_uri}")
+
+            client = get_storage_client()
+
+            progress = {
+                "last_artist_uri": artist_uri,
+                DATA_LIST_NAME: artistData_list,
+            }
+
+            # save progress to GCS
+            save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
+
+            raise AirflowFailException("Connection error, marking DAG as failed.")
 
     return artistData_list
 
@@ -183,7 +175,7 @@ def get_artist_data(**context):
     """
 
     df = get_artist_uris()
-    artist_uris = list(set(df["artistUri"]))  # distinct artistUri
+    artist_uris = list(df["artistUri"].drop_duplicates())  # distinct artistUri
 
     # read form gcs
     # try reload progress from GCS
@@ -201,9 +193,7 @@ def get_artist_data(**context):
         artistData_list = []
         last_artist_uri = None
 
-    artistData_list = for_loop_get_response(
-        artist_uris, last_artist_uri, artistData_list
-    )
+    artistData_list = for_loop_get_response(artist_uris, artistData_list)
 
     context["ti"].xcom_push(key="result", value=artistData_list)
 
@@ -223,7 +213,7 @@ def check_no_missing_data(**context):
         # get API data again and put missing data in artistData_list
         artist_uris = find_missing_data(URI_TYPE, data=artistData_list)
         artistData_list = for_loop_get_response(
-            artist_uris, last_artist_uri=None, artistData_list=artistData_list
+            artist_uris, artistData_list=artistData_list
         )
         logging.info(f"Get the missing data done! There is {len(artistData_list)} data")
         client = get_storage_client()

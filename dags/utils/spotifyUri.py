@@ -1,7 +1,8 @@
-from utils.GCP_client import get_bq_client
+from utils.GCP_client import get_bq_client, get_storage_client
 import pandas as pd
 import logging
 from google.cloud import bigquery
+from typing import Union
 
 
 def get_track_uris() -> pd.DataFrame:
@@ -23,20 +24,22 @@ def filter_track_uris(track_uris: list, last_track_uri: str) -> list:
     """
     filter TrackUri list
     """
-    # Find the index of last_track_uri in track_uris
-    if last_track_uri in track_uris:
-        last_index = track_uris.index(last_track_uri)
-        # Keep only the elements after the last_track_uri
-        track_uris = track_uris[last_index + 1 :]
-        logging.info(f"Start from {last_index} of trackUris!")
-    return track_uris
+    df_indexed = get_track_uris().set_index("trackUri")
+    last_index = df_indexed.index.get_loc(last_track_uri)
+
+    # Keep only the elements after the last_track_uri
+    track_uris = df_indexed[last_index + 1 :]
+    logging.info(f"Start from {last_index+1} of trackUris!")
+    # print(track_uris.index.values.flatten().tolist())
+    return track_uris.index.values.flatten().tolist()
 
 
-def is_last_uri_last_in_list(track_uris: list, last_track_uri: str) -> bool:
-    """
-    Check if last_track_uri is the last item in track_uris
-    """
-    return track_uris[-1] == last_track_uri if track_uris else False
+# def is_last_uri_last_in_list(track_uris: list, last_track_uri: str) -> bool:
+#     """
+#     Check if last_track_uri is the last item in track_uris
+#     """
+#     print(f"{track_uris[-1] == last_track_uri if track_uris else False}")
+#     return track_uris[-1] == last_track_uri if track_uris else False
 
 
 def get_artist_uris() -> pd.DataFrame:
@@ -61,12 +64,14 @@ def filter_artist_uris(artist_uris: list, last_artist_uri: str) -> list:
     filter ArtistUri list
     """
     # Find the index of last_artist_uri in artist_uris
-    if last_artist_uri in artist_uris:
-        last_index = artist_uris.index(last_artist_uri)
-        # Keep only the elements after the last_track_uri
-        artist_uris = artist_uris[last_index + 1 :]
-        logging.info(f"Start from {last_index} of ArtistUris!")
-    return artist_uris
+    df_indexed = get_artist_uris().set_index("artistUri")
+    last_index = df_indexed.index.get_loc(last_artist_uri)
+
+    # Keep only the elements after the last_artist_uri
+    artist_uris = df_indexed[last_index + 1 :]
+    logging.info(f"Start from {last_index+1} of artistUris!")
+    # print(artist_uris.index.values.flatten().tolist())
+    return artist_uris.index.values.flatten().tolist()
 
 
 def check_missing_data(uri_type: str, data: list) -> bool:
@@ -88,10 +93,11 @@ def find_missing_data(uri_type: str, data: list) -> list:
     find missing data
     """
     if uri_type == "track":
-        chart_uris = get_track_uris().values.tolist()
+        chart_uris = get_track_uris().values.flatten().tolist()
 
     elif uri_type == "artist":
-        chart_uris = get_artist_uris().values.tolist()
+        chart_uris = get_artist_uris().values.flatten().tolist()
 
     diff = [item for item in chart_uris if item not in data]
+    print(f"diff{len(diff)}")
     return diff

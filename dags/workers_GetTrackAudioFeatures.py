@@ -2,7 +2,6 @@ import logging
 from utils.DiscordNotifier import DiscordNotifier
 from utils.spotifyUri import (
     get_track_uris,
-    is_last_uri_last_in_list,
     filter_track_uris,
     check_missing_data,
     find_missing_data,
@@ -46,9 +45,7 @@ default_args = {
 }
 
 
-def for_loop_get_response(
-    track_uris: list, last_track_uri: str, trackData_list: list
-) -> list:
+def for_loop_get_response(track_uris: list, trackData_list: list) -> list:
     """
     for loop to get API response
     """
@@ -72,102 +69,97 @@ def for_loop_get_response(
             current_worker_name, current_worker = next(worker_cycle)
             time.sleep(1)
 
-        if not is_last_uri_last_in_list(track_uris, last_track_uri):
-            access_token = check_if_need_update_token(
-                current_worker_name, current_worker
-            )
+        access_token = check_if_need_update_token(current_worker_name, current_worker)
 
-            headers = {
-                "accept": "*/*",
-                "accept-language": "zh-TW,zh;q=0.8",
-                "authorization": f"Bearer {access_token}",
-                "origin": "https://developer.spotify.com",
-                "referer": "https://developer.spotify.com/",
-                "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-                "sec-ch-ua-mobile": "?0",
-                "sec-ch-ua-platform": '"macOS"',
-                "sec-fetch-dest": "empty",
-                "sec-fetch-mode": "cors",
-                "sec-fetch-site": "same-site",
-                "sec-gpc": "1",
-                "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-                "Connection": "close",
-            }
+        headers = {
+            "accept": "*/*",
+            "accept-language": "zh-TW,zh;q=0.8",
+            "authorization": f"Bearer {access_token}",
+            "origin": "https://developer.spotify.com",
+            "referer": "https://developer.spotify.com/",
+            "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": '"macOS"',
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+            "Connection": "close",
+        }
 
-            get_track_url = API.format(track_uri)
-            print(get_track_url)
+        get_track_url = API.format(track_uri)
+        print(get_track_url)
 
-            try:
-                response = requests.get(get_track_url, headers=headers, verify=False)
+        try:
+            response = requests.get(get_track_url, headers=headers, verify=False)
 
-                if response.status_code == 429:
-                    logging.info(
-                        f"Reach the request limitation, change the worker now!"
-                    )
-                    time.sleep(10)
-                    access_token = check_if_need_update_token(
-                        current_worker_name, current_worker
-                    )
-                    response = requests.get(
-                        get_track_url,
-                        headers={
-                            "accept": "*/*",
-                            "accept-language": "zh-TW,zh;q=0.8",
-                            "authorization": f"Bearer {access_token}",
-                            "origin": "https://developer.spotify.com",
-                            "referer": "https://developer.spotify.com/",
-                            "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
-                            "sec-ch-ua-mobile": "?0",
-                            "sec-ch-ua-platform": '"macOS"',
-                            "sec-fetch-dest": "empty",
-                            "sec-fetch-mode": "cors",
-                            "sec-fetch-site": "same-site",
-                            "sec-gpc": "1",
-                            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-                            "Connection": "close",
-                        },
-                        verify=False,
-                    )
+            if response.status_code == 429:
+                logging.info(f"Reach the request limitation, change the worker now!")
+                time.sleep(10)
+                access_token = check_if_need_update_token(
+                    current_worker_name, current_worker
+                )
+                response = requests.get(
+                    get_track_url,
+                    headers={
+                        "accept": "*/*",
+                        "accept-language": "zh-TW,zh;q=0.8",
+                        "authorization": f"Bearer {access_token}",
+                        "origin": "https://developer.spotify.com",
+                        "referer": "https://developer.spotify.com/",
+                        "sec-ch-ua": '"Brave";v="123", "Not:A-Brand";v="8", "Chromium";v="123"',
+                        "sec-ch-ua-mobile": "?0",
+                        "sec-ch-ua-platform": '"macOS"',
+                        "sec-fetch-dest": "empty",
+                        "sec-fetch-mode": "cors",
+                        "sec-fetch-site": "same-site",
+                        "sec-gpc": "1",
+                        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+                        "Connection": "close",
+                    },
+                    verify=False,
+                )
 
-                track_data = response.json()
-                trackData_list.append(track_data)
+            track_data = response.json()
+            trackData_list.append(track_data)
 
-                count += 1
-                logging.info(f"{count}-{track_uri}")
+            count += 1
+            logging.info(f"{count}-{track_uri}")
 
-                # n = random.randint(1,3)  ## gen 1~3s
-                time.sleep(1)
+            # n = random.randint(1,3)  ## gen 1~3s
+            time.sleep(1)
 
-                # 每100筆睡2秒
-                if count % 100 == 0:
-                    time.sleep(2)
-                    client = get_storage_client()
-
-                    progress = {
-                        "last_track_uri": track_uri,
-                        DATA_LIST_NAME: trackData_list,
-                    }
-
-                    # save progress to GCS
-                    save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
-
-            except (SSLError, ConnectionError) as e:
-                response = requests.get(get_track_url, headers=headers, verify=False)
-                logging.info(f"get the {e} data again done!")
-
-                track_data = response.json()
-                trackData_list.append(track_data)
-
-                count += 1
-                logging.info(f"{count}-{track_uri}")
-
+            # 每100筆睡2秒
+            if count % 100 == 0:
+                time.sleep(2)
                 client = get_storage_client()
 
-                progress = {"last_track_uri": track_uri, DATA_LIST_NAME: trackData_list}
+                progress = {
+                    "last_track_uri": track_uri,
+                    DATA_LIST_NAME: trackData_list,
+                }
 
                 # save progress to GCS
                 save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
-                raise AirflowFailException("Connection error, marking DAG as failed.")
+
+        except (SSLError, ConnectionError) as e:
+            response = requests.get(get_track_url, headers=headers, verify=False)
+            logging.info(f"get the {e} data again done!")
+
+            track_data = response.json()
+            trackData_list.append(track_data)
+
+            count += 1
+            logging.info(f"{count}-{track_uri}")
+
+            client = get_storage_client()
+
+            progress = {"last_track_uri": track_uri, DATA_LIST_NAME: trackData_list}
+
+            # save progress to GCS
+            save_progress_to_gcs(client, progress, BUCKET_FILE_PATH)
+            raise AirflowFailException("Connection error, marking DAG as failed.")
 
     return trackData_list
 
@@ -179,7 +171,7 @@ def get_track_data(**context):
     """
 
     df = get_track_uris()
-    track_uris = list(set(df["trackUri"]))  # distinct TrackUri
+    track_uris = list(df["trackUri"].drop_duplicates())  # distinct TrackUri
 
     # read form gcs
     # try reload progress from GCS
@@ -197,7 +189,7 @@ def get_track_data(**context):
         trackData_list = []
         last_track_uri = None
 
-    trackData_list = for_loop_get_response(track_uris, last_track_uri, trackData_list)
+    trackData_list = for_loop_get_response(track_uris, trackData_list)
 
     context["ti"].xcom_push(key="result", value=trackData_list)
 
@@ -217,7 +209,7 @@ def check_no_missing_data(**context):
         # get API data again and put missing data in trackData_list
         track_uris = find_missing_data(URI_TYPE, data=trackData_list)
         trackData_list = for_loop_get_response(
-            track_uris, last_track_uri=None, trackData_list=trackData_list
+            track_uris, trackData_list=trackData_list
         )
         logging.info(f"Get the missing data done! There is {len(trackData_list)} data")
         client = get_storage_client()
