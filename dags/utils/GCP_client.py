@@ -14,7 +14,7 @@ def get_bq_client() -> bigquery.Client:
     """
     try:
         return bigquery.Client.from_service_account_json(
-            r"dags\cloud\affable-hydra-422306-r3-e77d83c42f33.json"
+            "dags/cloud/affable-hydra-422306-r3-e77d83c42f33.json"
         )
     except Exception as e:
         logging.info(f"Error connecting to the BigQuery: {e}")
@@ -26,7 +26,9 @@ def get_storage_client() -> storage.Client:
     return GCS client
     """
     try:
-        return storage.Client()
+        return storage.Client.from_service_account_json(
+            "dags/cloud/affable-hydra-422306-r3-e77d83c42f33.json"
+        )
     except Exception as e:
         logging.info(f"Error connecting to the GCS: {e}")
         return None

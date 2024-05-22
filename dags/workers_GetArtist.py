@@ -12,19 +12,17 @@ from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.exceptions import AirflowFailException
 import itertools
-from google.oauth2 import service_account
-from google.cloud import bigquery
 import pandas as pd
 from pandas import json_normalize
 import requests
 import json
 import time
 import random
-import datetime
+from datetime import datetime
 import itertools
 import urllib3
 from requests.exceptions import SSLError, ConnectionError
-import pendulum
+
 
 urllib3.disable_warnings()
 
