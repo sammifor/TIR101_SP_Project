@@ -13,7 +13,9 @@ def get_bq_client() -> bigquery.Client:
     return BigQuery client
     """
     try:
-        return bigquery.Client()
+        return bigquery.Client.from_service_account_json(
+            r"dags\cloud\affable-hydra-422306-r3-e77d83c42f33.json"
+        )
     except Exception as e:
         logging.info(f"Error connecting to the BigQuery: {e}")
         return None
