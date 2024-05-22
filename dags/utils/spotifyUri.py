@@ -78,6 +78,7 @@ def check_missing_data(uri_type: str, data: list) -> bool:
     """
     if there is no missing data of API will return TRUE
     """
+
     if uri_type == "track":
         chart_uris = len(get_track_uris())
 
@@ -92,12 +93,19 @@ def find_missing_data(uri_type: str, data: list) -> list:
     """
     find missing data
     """
+    all_uris = []
+    for item in data:
+        if "uri" in item:
+            all_uris.append(item["uri"].split(":")[-1])
+
+    # print(all_uris)
+
     if uri_type == "track":
         chart_uris = get_track_uris().values.flatten().tolist()
 
     elif uri_type == "artist":
         chart_uris = get_artist_uris().values.flatten().tolist()
 
-    diff = [item for item in chart_uris if item not in data]
-    print(f"diff{len(diff)}")
+    diff = [uri for uri in chart_uris if uri not in all_uris]
+    print(f"diff are {len(diff)}")
     return diff

@@ -11,6 +11,7 @@ from utils.worker_refresh_token import get_workers, check_if_need_update_token
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.exceptions import AirflowFailException
+from airflow.operators.dagrun_operator import TriggerDagRunOperator
 import itertools
 from google.oauth2 import service_account
 from google.cloud import bigquery
@@ -183,16 +184,19 @@ def get_track_data(**context):
 
     if blob.exists():
         progress = json.loads(blob.download_as_text())
-        trackData_list = progress[DATA_LIST_NAME]
-        last_track_uri = progress["last_track_uri"]
-        track_uris = filter_track_uris(track_uris, last_track_uri)
-        # print(track_uris)
+        if isinstance(progress, dict):
+            trackData_list = progress[DATA_LIST_NAME]
+            last_track_uri = progress["last_track_uri"]
+            track_uris = filter_track_uris(track_uris, last_track_uri)
+            trackData_list = for_loop_get_response(track_uris, trackData_list)
+        else:
+            trackData_list = progress
     else:
         trackData_list = []
-        last_track_uri = None
+        trackData_list = for_loop_get_response(track_uris, trackData_list)
 
-    trackData_list = for_loop_get_response(track_uris, trackData_list)
-
+    # save progress to GCS
+    save_progress_to_gcs(client, trackData_list, BUCKET_FILE_PATH)
     context["ti"].xcom_push(key="result", value=trackData_list)
 
 
@@ -200,7 +204,20 @@ def check_no_missing_data(**context):
     """
     make sure no missing data from API
     """
-    trackData_list = context["ti"].xcom_pull(task_ids="get_track_data", key="result")
+    Data_list = context["ti"].xcom_pull(task_ids="get_track_data", key="result")
+
+    # 去除重複
+    # 用於保存不重複的字典
+    trackData_set = set()
+
+    # 遍歷字典列表，將字典轉換為 JSON 字符串並添加到集合中
+    for d in Data_list:
+        # 將字典轉換為 JSON 字符串並添加到集合中
+        trackData_set.add(json.dumps(d, sort_keys=True))
+
+    # 將集合中的 JSON 字符串轉換回字典
+    trackData_list = [json.loads(s) for s in trackData_set]
+
     if check_missing_data(URI_TYPE, data=trackData_list):
         client = get_storage_client()
         save_progress_to_gcs(client, trackData_list, BUCKET_FILE_PATH)
@@ -231,6 +248,7 @@ def process_data_in_gcs():
     df = pd.json_normalize(trackData_list).drop(
         columns=["album.images", "available_markets"]
     )
+
     df_exploded = df.explode("artists")
     df_artists = pd.json_normalize(df_exploded["artists"])
 
@@ -244,7 +262,9 @@ def process_data_in_gcs():
         "external_urls.spotify": "artists.external_urls.spotify",
     }
     df_rename = df_artists.rename(columns=rename_columns)
-    df_final = df_exploded.drop(columns="artists")
+    df_final = df_exploded.drop(
+        columns=["artists", "album.artists", "album.available_markets"]
+    )
 
     df_final["artists.href"] = df_rename["artists.href"]
     df_final["artists.id"] = df_rename["artists.id"]
@@ -259,18 +279,20 @@ def process_data_in_gcs():
     for index, row in df_final.iterrows():
         if row["album.release_date"] == "0000":
             df_final.loc[index, "album.release_date"] = "1970-01-01"
-            print(f"{df_final.loc[index, 'uri']}")
+            # print(f"{df_final.loc[index, 'uri']}")
         elif row["album.release_date_precision"] == "year":
             df_final.loc[index, "album.release_date"] = (
                 str(row["album.release_date"]) + "-01-01"
             )
-            print(f"{df_final.loc[index, 'uri']}")
+            # print(f"{df_final.loc[index, 'uri']}")
 
         elif row["album.release_date_precision"] == "month":
             df_final.loc[index, "album.release_date"] = (
                 str(row["album.release_date"]) + "-01"
             )
-            print(f"{df_final.loc[index, 'uri']}")
+            # print(f"{df_final.loc[index, 'uri']}")
+
+    df_final = df_final.rename(columns=lambda x: x.replace(".", "_")).drop_duplicates()
 
     # Upload to GCS
     local_file_path = LOCAL_FILE_PATH
@@ -310,5 +332,13 @@ with DAG(
         provide_context=True,
     )
 
+    # Trigger DAG B after DAG A completes
+    external_sensor = TriggerDagRunOperator(
+        task_id="external_sensor",
+        trigger_dag_id="workers_GCS_to_BQ_from_API.py",  # DAG B name
+        conf={},  # 可以添加需要傳遞給 DAG B 的任何參數
+        dag=dag,
+    )
+
 # Order of DAGs
-get_track_data >> check_no_missing_data >> process_data_in_gcs
+(get_track_data >> check_no_missing_data >> process_data_in_gcs >> external_sensor)

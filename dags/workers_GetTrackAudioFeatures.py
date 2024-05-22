@@ -182,15 +182,19 @@ def get_track_data(**context):
 
     if blob.exists():
         progress = json.loads(blob.download_as_text())
-        trackData_list = progress[DATA_LIST_NAME]
-        last_track_uri = progress["last_track_uri"]
-        track_uris = filter_track_uris(track_uris, last_track_uri)
+        if isinstance(progress, dict):
+            trackData_list = progress[DATA_LIST_NAME]
+            last_track_uri = progress["last_track_uri"]
+            track_uris = filter_track_uris(track_uris, last_track_uri)
+            trackData_list = for_loop_get_response(track_uris, trackData_list)
+        else:
+            trackData_list = progress
     else:
         trackData_list = []
-        last_track_uri = None
+        trackData_list = for_loop_get_response(track_uris, trackData_list)
 
-    trackData_list = for_loop_get_response(track_uris, trackData_list)
-
+    # save progress to GCS
+    save_progress_to_gcs(client, trackData_list, BUCKET_FILE_PATH)
     context["ti"].xcom_push(key="result", value=trackData_list)
 
 
@@ -198,7 +202,20 @@ def check_no_missing_data(**context):
     """
     make sure no missing data from API
     """
-    trackData_list = context["ti"].xcom_pull(task_ids="get_track_data", key="result")
+    Data_list = context["ti"].xcom_pull(task_ids="get_track_data", key="result")
+
+    # 去除重複
+    # 用於保存不重複的字典
+    trackData_set = set()
+
+    # 遍歷字典列表，將字典轉換為 JSON 字符串並添加到集合中
+    for d in Data_list:
+        # 將字典轉換為 JSON 字符串並添加到集合中
+        trackData_set.add(json.dumps(d, sort_keys=True))
+
+    # 將集合中的 JSON 字符串轉換回字典
+    trackData_list = [json.loads(s) for s in trackData_set]
+
     if check_missing_data(URI_TYPE, data=trackData_list):
         client = get_storage_client()
         save_progress_to_gcs(client, trackData_list, BUCKET_FILE_PATH)
@@ -225,7 +242,10 @@ def process_data_in_gcs():
     trackAudioFeatures_list = json.loads(blob.download_as_text())
 
     # Extend data
-    df_trackAudioFeatures = pd.json_normalize(trackAudioFeatures_list)
+    df_trackAudioFeatures = pd.json_normalize(trackAudioFeatures_list).drop_duplicates()
+    df_trackAudioFeatures = df_trackAudioFeatures.rename(
+        columns=lambda x: x.replace(".", "_")
+    )
 
     # Upload to GCS
     local_file_path = LOCAL_FILE_PATH

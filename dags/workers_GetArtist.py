@@ -20,10 +20,11 @@ import requests
 import json
 import time
 import random
-from datetime import datetime
+import datetime
 import itertools
 import urllib3
 from requests.exceptions import SSLError, ConnectionError
+import pendulum
 
 urllib3.disable_warnings()
 
@@ -181,20 +182,25 @@ def get_artist_data(**context):
     # try reload progress from GCS
     client = get_storage_client()
 
-    bucket = client.bucket("api_spotify_artists_artists")
+    bucket = client.bucket("api_spotify_artists_tracks")
     blob = bucket.blob(BUCKET_FILE_PATH)
 
     if blob.exists():
         progress = json.loads(blob.download_as_text())
-        artistData_list = progress[DATA_LIST_NAME]
-        last_artist_uri = progress["last_artist_uri"]
-        artist_uris = filter_artist_uris(artist_uris, last_artist_uri)
+        if isinstance(progress, dict):
+            artistData_list = progress[DATA_LIST_NAME]
+            last_artist_uri = progress["last_artist_uri"]
+            artist_uris = filter_artist_uris(artist_uris, last_artist_uri)
+            artistData_list = for_loop_get_response(artist_uris, artistData_list)
+        else:
+            artistData_list = progress
+
     else:
         artistData_list = []
-        last_artist_uri = None
+        artistData_list = for_loop_get_response(artist_uris, artistData_list)
 
-    artistData_list = for_loop_get_response(artist_uris, artistData_list)
-
+    # save progress to GCS
+    save_progress_to_gcs(client, artistData_list, BUCKET_FILE_PATH)
     context["ti"].xcom_push(key="result", value=artistData_list)
 
 
@@ -202,7 +208,20 @@ def check_no_missing_data(**context):
     """
     make sure no missing data from API
     """
-    artistData_list = context["ti"].xcom_pull(task_ids="get_artist_data", key="result")
+    Data_list = context["ti"].xcom_pull(task_ids="get_artist_data", key="result")
+
+    # 去除重複
+    # 用於保存不重複的字典
+    artistData_set = set()
+
+    # 遍歷字典列表，將字典轉換為 JSON 字符串並添加到集合中
+    for d in Data_list:
+        # 將字典轉換為 JSON 字符串並添加到集合中
+        artistData_set.add(json.dumps(d, sort_keys=True))
+
+    # 將集合中的 JSON 字符串轉換回字典
+    artistData_list = [json.loads(s) for s in artistData_set]
+
     if check_missing_data(URI_TYPE, data=artistData_list):
         client = get_storage_client()
         save_progress_to_gcs(client, artistData_list, BUCKET_FILE_PATH)
@@ -231,13 +250,14 @@ def process_data_in_gcs():
     # Extend data
     df = pd.json_normalize(artistData_list).drop(columns=["images"])
     df_genres = df.explode("genres")
+    df_final = df_genres.rename(columns=lambda x: x.replace(".", "_")).drop_duplicates()
 
     # Upload to GCS
     local_file_path = LOCAL_FILE_PATH
     gcs_bucket = "api_spotify_artists_tracks"
     gcs_file_name = f"output/{local_file_path}"
 
-    df_genres.to_csv(local_file_path, index=False)
+    df_final.to_csv(local_file_path, index=False)
 
     bucket = client.get_bucket(gcs_bucket)
     blob = bucket.blob(gcs_file_name)
@@ -248,7 +268,7 @@ def process_data_in_gcs():
 with DAG(
     "workers_GetArtist.py",
     default_args=default_args,
-    schedule_interval="@monthly",
+    schedule_interval=None,
     catchup=False,
 ) as dag:
 
