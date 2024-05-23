@@ -43,6 +43,9 @@ def get_artists_detail(artist_id: str):
     get specific artist detail from Schema_Use_Final.dim_Artist
     """
     client = get_bq_client()
+
+    without_spaces = artist_id.replace(' ', '')
+    
     query = """
     SELECT *
     FROM `affable-hydra-422306-r3.Schema_Use_Final.dim_Artist`
@@ -50,7 +53,7 @@ def get_artists_detail(artist_id: str):
     """
     job_config = bigquery.QueryJobConfig(
         query_parameters=[
-            bigquery.ScalarQueryParameter("artist_id", "STRING", artist_id)
+            bigquery.ScalarQueryParameter("artist_id", "STRING", without_spaces)
         ]
     )
     query_job = client.query(query, job_config=job_config)

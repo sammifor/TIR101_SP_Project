@@ -124,7 +124,7 @@ def tracks_detail(track_id: str):
     FROM: mart_metadata.dwd_tracks_with_analysis_and_features
     """
     try:
-        result = get_tracks_detail(track_id)
+        result = get_tracks_detail(track_id.strip())
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

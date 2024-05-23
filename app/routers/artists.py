@@ -108,7 +108,7 @@ def artists_detail(artist_id: str):
     FROM: Schema_Use_Final.dim_Artist
     """
     try:
-        result = get_artists_detail(artist_id)
+        result = get_artists_detail(artist_id.strip())
         if not result:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

@@ -46,11 +46,13 @@ def get_artist_chart_detail(track_or_artist: bool, id: str):
     """
     client = get_bq_client()
 
+    without_spaces = id.replace(" ", "")
+
     # 根据 track_or_artist 的值生成相应的查询条件
     if track_or_artist:
         condition = "trackMetadata_trackUri = @id"
     else:
-        condition = f"REGEXP_CONTAINS(artistUris, r'(^|,){id}(,|$)')"
+        condition = f"REGEXP_CONTAINS(artistUris, r'(^|,){without_spaces}(,|$)')"
 
     query = f"""
     SELECT *
@@ -59,7 +61,7 @@ def get_artist_chart_detail(track_or_artist: bool, id: str):
     """
 
     job_config = bigquery.QueryJobConfig(
-        query_parameters=[bigquery.ScalarQueryParameter("id", "STRING", id)]
+        query_parameters=[bigquery.ScalarQueryParameter("id", "STRING", without_spaces)]
     )
     query_job = client.query(query, job_config=job_config)
     results = query_job.result()

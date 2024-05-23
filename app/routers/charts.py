@@ -91,7 +91,7 @@ def artist_chart_detail(
     FROM: dwd_metadata.dwd_chart_tracks_artists_genres
     """
     try:
-        result = get_artist_chart_detail(track_or_artist, id)
+        result = get_artist_chart_detail(track_or_artist, id.strip())
         if not result:
             item_type = "track" if track_or_artist else "artist"
             raise HTTPException(

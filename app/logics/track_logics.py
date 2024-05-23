@@ -43,6 +43,9 @@ def get_tracks_detail(track_id: str):
     get specific track detail from dwd_tracks_with_analysis_and_features
     """
     client = get_bq_client()
+
+    without_spaces = track_id.replace(" ", "")
+
     query = """
     SELECT trackMetadata_trackUri, track_name, track_duration_ms, track_explicit,
     track_popularity, trackMetadata_artists_spotifyUri, album_id,
@@ -52,7 +55,9 @@ def get_tracks_detail(track_id: str):
     WHERE trackMetadata_trackUri = @track_id
     """
     job_config = bigquery.QueryJobConfig(
-        query_parameters=[bigquery.ScalarQueryParameter("track_id", "STRING", track_id)]
+        query_parameters=[
+            bigquery.ScalarQueryParameter("track_id", "STRING", without_spaces)
+        ]
     )
     query_job = client.query(query, job_config=job_config)
     results = query_job.result()
