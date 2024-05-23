@@ -40,22 +40,28 @@ def get_charts(
     return [dict(row) for row in results]
 
 
-def get_charts_by_year(year: int):
+def get_artist_chart_detail(track_or_artist: bool, id: str):
     """
-    get yearly charts from dwd_metadata.dwd_chart_tracks_artists_genres
+    get Artist track detail on chart from dwd_metadata.dwd_chart_tracks_artists_genres
     """
     client = get_bq_client()
-    query = """
+
+    # 根据 track_or_artist 的值生成相应的查询条件
+    if track_or_artist:
+        condition = "trackMetadata_trackUri = @id"
+    else:
+        condition = f"REGEXP_CONTAINS(artistUris, r'(^|,){id}(,|$)')"
+
+    query = f"""
     SELECT *
     FROM `affable-hydra-422306-r3.dwd_metadata.dwd_chart_tracks_artists_genres`
-    WHERE EXTRACT(YEAR FROM chart_date) = @year
+    WHERE {condition}
     """
 
     job_config = bigquery.QueryJobConfig(
-        query_parameters=[bigquery.ScalarQueryParameter("year", "INT64", year)]
+        query_parameters=[bigquery.ScalarQueryParameter("id", "STRING", id)]
     )
     query_job = client.query(query, job_config=job_config)
     results = query_job.result()
-    # 取得第一行結果，轉換為字典
-    yearly_chart = dict(next(results))
-    return yearly_chart
+
+    return [dict(row) for row in results]

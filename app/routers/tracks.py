@@ -25,7 +25,11 @@ def count_Tracks():
                 status_code=status.HTTP_404_NOT_FOUND, detail="No Tracks found"
             )
         return result
+    except HTTPException as http_exc:
+        # 404
+        raise http_exc
     except Exception as e:
+        # 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
@@ -59,7 +63,11 @@ def all_Tracks():
                 status_code=status.HTTP_404_NOT_FOUND, detail="No Tracks found"
             )
         return result
+    except HTTPException as http_exc:
+        # 404
+        raise http_exc
     except Exception as e:
+        # 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
@@ -123,7 +131,11 @@ def tracks_detail(track_id: str):
                 detail=f"No Tracks id : {track_id} found",
             )
         return result
+    except HTTPException as http_exc:
+        # 404
+        raise http_exc
     except Exception as e:
+        # 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )

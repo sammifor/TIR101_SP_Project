@@ -42,7 +42,11 @@ def count_artists():
                 status_code=status.HTTP_404_NOT_FOUND, detail="No artists found"
             )
         return result
+    except HTTPException as http_exc:
+        # 404
+        raise http_exc
     except Exception as e:
+        # 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
@@ -74,7 +78,11 @@ def all_artists():
                 status_code=status.HTTP_404_NOT_FOUND, detail="No artists found"
             )
         return result
+    except HTTPException as http_exc:
+        # 404
+        raise http_exc
     except Exception as e:
+        # 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
@@ -107,7 +115,11 @@ def artists_detail(artist_id: str):
                 detail=f"No artists id : {artist_id} found",
             )
         return result
+    except HTTPException as http_exc:
+        # 404
+        raise http_exc
     except Exception as e:
+        # 500
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
         )
