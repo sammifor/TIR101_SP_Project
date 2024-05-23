@@ -121,9 +121,10 @@ def export_to_BQ():
                 "gs://api_spotify_artists_tracks/changeDataType/2023.csv",
                 "gs://api_spotify_artists_tracks/changeDataType/2024.csv",
             ],
-            dataset_id="stage_ChangeDataType",
+            dataset_id="stage_ChangeDataType_ExternalTable",
             table_id=f"expand_table_2017_2024",
             external_source_format="CSV",
+            schema=None,
         )
 
 

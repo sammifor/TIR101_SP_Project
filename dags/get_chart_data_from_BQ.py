@@ -137,6 +137,7 @@ def expand_and_change_datatype() -> None:
         )
 
         # print(artists_labels["artistUri"], artists_labels["trackUri"])
+        artists_labels = artists_labels.rename(columns=lambda x: x.replace(".", "_"))
 
         save_to_gcs(year, artists_labels)
 
@@ -166,6 +167,7 @@ def export_to_BQ():
                 f"gs://api_spotify_artists_tracks/changeDataType/{year}.csv",
                 dataset_id="stage_ChangeDataType_ExternalTable",
                 table_id=f"{year}",
+                schema=None,
                 external_source_format="CSV",
             )
 
@@ -190,11 +192,11 @@ with DAG(
     )
 
     # Trigger DAG B after DAG A completes
-    merge_chart_data_to_GCS = TriggerDagRunOperator(
-        task_id="merge_chart_data_to_GCS.py",
+    trigger_dag = TriggerDagRunOperator(
+        task_id="trigger_dag",
         trigger_dag_id="merge_chart_data_to_GCS.py",  # DAG B name
         conf={},  # 可以添加需要傳遞給 DAG B 的任何參數
         dag=dag,
     )
 
-    expand_and_change_datatype >> export_to_BQ >> merge_chart_data_to_GCS
+    expand_and_change_datatype >> export_to_BQ >> trigger_dag

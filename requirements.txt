@@ -4,3 +4,7 @@ kafka-python3==3.0.0
 discord_notify==1.0.0
 spotipy==2.23.0
 great-expectations==0.18.13
+fastapi==0.68.0
+uvicorn[standard]==0.15.0
+google-cloud-bigquery==2.34.0
+google-cloud-storage==1.41.0
